@@ -50,6 +50,7 @@ export default async function extractValidUrl(
         logger.info(`Valid URL found: ${decodedUrl}`);
         return decodedUrl;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       logger.error(`Error validating URL: ${inputString}`, error);
 

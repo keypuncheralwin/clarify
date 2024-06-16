@@ -12,19 +12,20 @@ import {
   YoutubeTranscriptError,
 } from '../utils/youtubeTranscript';
 import { generateClickbaitYouTubePrompt } from '../constants/youtube';
-import dotenv from 'dotenv';
 import { safetySettings } from '../constants/gemini';
-dotenv.config();
-
-const apiKey = process.env.GEMINI_API_TOKEN || '';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
  * @param url - The YouTube video URL.
  * @param res - The Express response object.
+ * @param apiKey - The gemini api key.
  * @returns {Promise<void>} - A promise that resolves when the processing is complete.
  */
-async function processYouTubeLink(url: string, res: Response): Promise<void> {
+async function processYouTubeLink(
+  url: string,
+  res: Response,
+  apiKey: string
+): Promise<void> {
   if (!extractYouTubeID(url)) {
     res.status(400).json({ error: 'Unable to extract video ID from URL' });
     return;
@@ -71,6 +72,7 @@ async function processYouTubeLink(url: string, res: Response): Promise<void> {
     const response = extractJson(data);
     logger.info('Response received from AI model', { response });
     res.json({ response });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);

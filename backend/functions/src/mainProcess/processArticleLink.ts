@@ -5,26 +5,24 @@ import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import fetchArticle from '../utils/fetchArticle';
 import { getChatResponse } from '../utils/general';
-import dotenv from 'dotenv';
-dotenv.config();
 
 /**
  * Process the article link and handle the entire flow.
  * @param validUrl - The validated URL of the article.
  * @param model - The Google Generative AI model.
  * @param res - The Express response object.
+ * @param apiKey - The gemini api key.
  */
 async function processArticleLink(
   validUrl: string,
-  res: Response
+  res: Response,
+  apiKey: string
 ): Promise<void> {
   const article = await fetchArticle(validUrl);
   if (!article) {
     res.status(400).send('Invalid URL');
     return;
   }
-
-  const apiKey = process.env.GEMINI_API_TOKEN || '';
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const model = genAI.getGenerativeModel({
@@ -57,6 +55,7 @@ async function processArticleLink(
       logger.error('No response received from the chat session');
       res.status(500).send('Internal Server Error');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     logger.error(`Error processing article: ${error?.message}`, error);
     res.status(500).send('Internal Server Error');

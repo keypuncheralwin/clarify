@@ -110,6 +110,7 @@ function parseTranscriptEndpoint(
     let captionTrack = availableCaptions?.[0];
     if (langCode) {
       captionTrack =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         availableCaptions.find((track: any) =>
           track.languageCode.includes(langCode)
         ) ?? availableCaptions?.[0];

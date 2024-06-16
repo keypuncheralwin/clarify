@@ -54,6 +54,7 @@ export async function getBase64ImageFromUrl(
         const base64 = Buffer.from(response.data, 'binary').toString('base64');
         return base64;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
         // If the image is not found, try the next URL
