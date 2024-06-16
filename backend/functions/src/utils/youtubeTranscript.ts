@@ -100,8 +100,7 @@ function parseTranscriptEndpoint(
     const dataString =
       playerScript?.textContent
         ?.split('var ytInitialPlayerResponse = ')?.[1] //get the start of the object {....
-        ?.split('};')?.[0] + // chunk off any code after object closure.
-      '}'; // add back that curly brace we just cut.
+        ?.split('};')?.[0] + '}'; // chunk off any code after object closure. // add back that curly brace we just cut.
 
     const data = JSON.parse(dataString.trim()); // Attempt a JSON parse
     const availableCaptions =
