@@ -1,3 +1,4 @@
+import * as functions from 'firebase-functions';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import extractValidUrl from './utils/extractValidUrl';
@@ -7,7 +8,6 @@ import { isYouTubeVideoLink } from './utils/youtubeValidation';
 import processYouTubeLink from './mainProcess/processYoutubeLink';
 
 const app = express();
-const port = 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -30,6 +30,4 @@ app.post('/check-clickbait', async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port, () => {
-  logger.info(`Backend server is running on http://localhost:${port}`);
-});
+exports.api = functions.https.onRequest(app);
