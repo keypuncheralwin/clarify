@@ -132,27 +132,19 @@ function extractYouTubeID(urlOrID: string): string | null {
   // Regular expression for YouTube ID format
   const regExpID = /^[a-zA-Z0-9_-]{11}$/;
 
+  // Regular expression for different YouTube link formats
+  const regExpCombined =
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/;
+
   // Check if the input is a YouTube ID
   if (regExpID.test(urlOrID)) {
     return urlOrID;
   }
 
-  // Regular expression for standard YouTube links
-  const regExpStandard = /youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/;
-
-  // Regular expression for YouTube Shorts links
-  const regExpShorts = /youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/;
-
-  // Check for standard YouTube link
-  const matchStandard = urlOrID.match(regExpStandard);
-  if (matchStandard) {
-    return matchStandard[1];
-  }
-
-  // Check for YouTube Shorts link
-  const matchShorts = urlOrID.match(regExpShorts);
-  if (matchShorts) {
-    return matchShorts[1];
+  // Check for YouTube link formats
+  const match = urlOrID.match(regExpCombined);
+  if (match) {
+    return match[1];
   }
 
   // Return null if no match is found

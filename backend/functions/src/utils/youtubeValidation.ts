@@ -8,7 +8,8 @@ import { extractYouTubeID } from './youtubeTranscript';
  * @returns {boolean} - True if the URL is a YouTube video link, false otherwise.
  */
 export function isYouTubeVideoLink(url: string): boolean {
-  const youtubeRegex = /^(https?:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/;
+  const youtubeRegex =
+    /^(https?:\/\/)?(www\.youtube\.com|m\.youtube\.com|youtu\.be)\/.+$/;
   const isYouTubeLink = youtubeRegex.test(url);
 
   if (isYouTubeLink) {
