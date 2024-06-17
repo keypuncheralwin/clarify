@@ -19,25 +19,34 @@ const apiKey = process.env.GEMINI_API_TOKEN || '';
 app.post('/check-clickbait', async (req: Request, res: Response) => {
   if (!apiKey) {
     logger.error('Gemini API Key not loaded');
-    res.status(400).send('Invalid API Key');
-    return;
+    return res.status(400).send('Invalid API Key');
   }
 
   const { url } = req.body;
   logger.info(`Received URL: ${url}`);
 
-  const validUrl = await extractValidUrl(url);
-
-  if (!validUrl) {
-    res.status(400).send('Invalid URL');
-    return;
+  if (!url) {
+    return res.status(400).send('No URL provided');
   }
 
-  if (isYouTubeVideoLink(validUrl)) {
-    await processYouTubeLink(validUrl, res, apiKey);
-  } else {
-    await processArticleLink(validUrl, res, apiKey);
+  try {
+    if (isYouTubeVideoLink(url)) {
+      await processYouTubeLink(url, res, apiKey);
+    } else {
+      const validUrl = await extractValidUrl(url);
+      if (!validUrl) {
+        return res.status(400).send('Invalid URL');
+      }
+      await processArticleLink(validUrl, res, apiKey);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    logger.error(`Error processing URL: ${error.message}`);
+    return res
+      .status(500)
+      .send('An error occurred while processing the request');
   }
+  return;
 });
 
 exports.api = functions.https.onRequest(app);
