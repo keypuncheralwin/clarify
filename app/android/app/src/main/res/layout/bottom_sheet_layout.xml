@@ -4,6 +4,23 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <ImageView
+            android:id="@+id/closeButton"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end|top"
+            android:background="@drawable/circular_button_background"
+            android:padding="2dp"
+            android:src="@drawable/ic_close_black"
+            android:contentDescription="@string/close"
+            android:layout_marginEnd="1dp"
+            android:layout_marginTop="1dp"/>
+    </FrameLayout>
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"

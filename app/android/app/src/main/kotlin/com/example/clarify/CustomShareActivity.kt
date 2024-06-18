@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -35,15 +36,20 @@ class CustomShareActivity : Activity() {
         val bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout, null)
         bottomSheetDialog = BottomSheetDialog(this, R.style.RoundedBottomSheetDialog)
         bottomSheetDialog.setContentView(bottomSheetView)
-    
+
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    
+
         bottomSheetDialog.setOnDismissListener {
             Log.d("CustomShareActivity", "Bottom sheet dismissed")
             finish()
         }
-    
+
+        val closeButton: ImageView = bottomSheetView.findViewById(R.id.closeButton)
+        closeButton.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
         progressBar = bottomSheetView.findViewById(R.id.progressBar)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
