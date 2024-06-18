@@ -9,7 +9,7 @@ import { extractYouTubeID } from './youtubeTranscript';
  */
 export function isYouTubeVideoLink(url: string): boolean {
   const youtubeRegex =
-    /^(https?:\/\/)?(www\.youtube\.com|m\.youtube\.com|youtu\.be)\/.+$/;
+    /^(https?:\/\/)?(www\.youtube\.com|m\.youtube\.com|youtube\.com|youtu\.be)\/.+$/;
   const isYouTubeLink = youtubeRegex.test(url);
 
   if (isYouTubeLink) {
