@@ -14,7 +14,7 @@ import kotlinx.coroutines.*
 
 class CustomShareActivity : Activity() {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var bottomSheetDialog: BottomSheetDialog
     private lateinit var progressBar: ProgressBar
     private lateinit var titleTextView: TextView
@@ -22,7 +22,7 @@ class CustomShareActivity : Activity() {
     private lateinit var explanationTextView: TextView
     private lateinit var summaryTextView: TextView
 
-    private val apiService = ApiService(applicationContext)
+    private val apiService by lazy { ApiService(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
