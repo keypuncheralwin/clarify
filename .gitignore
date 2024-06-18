@@ -97,6 +97,7 @@ app.*.map.json
 /android/app/release
 
 # Flutter specific files
+app/android/app/src/main/assets/config.yaml
 app/.dart_tool/
 app/.idea/
 app.packages
