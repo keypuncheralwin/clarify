@@ -118,3 +118,7 @@ app/ios/Flutter/Generated.xcconfig
 app/ios/ServiceDefinitions.json
 app/pubspec.lock
 app/.flutter-plugins-dependencies
+/app/android/.gradle/
+/app/android/build/
+/app/android/app/build/
+/app/android/local.properties
