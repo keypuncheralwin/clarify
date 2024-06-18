@@ -52,3 +52,68 @@ docker-compose.override.yml
 
 # Debug
 debug/
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Flutter specific files
+app/.dart_tool/
+app/.idea/
+app.packages
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/flutter_01.png
+app/flutter_export_environment.sh
+app/.metadata
+app/.android/
+app/.ios/
+app/build/
+app/flutter_export_environment.sh
+app/.ios/
+app/.packages
+app/ios/Flutter/App.framework
+app/ios/Flutter/Flutter.framework
+app/ios/Flutter/Generated.xcconfig
+app/ios/ServiceDefinitions.json
+app/pubspec.lock
+app/.flutter-plugins-dependencies
