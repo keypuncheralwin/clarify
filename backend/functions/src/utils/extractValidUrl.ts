@@ -24,8 +24,8 @@ export default async function extractValidUrl(
   }
 
   // Check if the URL is valid
-  for (let i = urls.length - 1; i >= 0; i--) {
-    let currentUrl = urls[i];
+  for (const url of urls) {
+    let currentUrl = url;
 
     // Ensure the URL starts with http or https
     if (!currentUrl.startsWith('http')) {
@@ -44,15 +44,22 @@ export default async function extractValidUrl(
           return decodeURIComponent(actualUrl);
         }
       } else {
-        await axios.get(decodedUrl, { maxRedirects: 0 });
+        const response = await axios.get(decodedUrl, { maxRedirects: 5 });
 
-        // If we get here, the URL is valid and there's no redirect
-        logger.info(`Valid URL found: ${decodedUrl}`);
-        return decodedUrl;
+        // Check if the response is valid
+        if (response.status >= 200 && response.status < 300) {
+          const finalUrl = response.request.res.responseUrl;
+          logger.info(`Valid URL found: ${finalUrl}`);
+          return finalUrl;
+        } else {
+          logger.error(
+            `Invalid response status: ${response.status} for URL: ${decodedUrl}`
+          );
+        }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      logger.error(`Error validating URL: ${inputString}`, error);
+      logger.error(`Error validating URL: ${currentUrl}`, error);
 
       if (
         error.response &&

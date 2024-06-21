@@ -4,21 +4,22 @@ import { extractYouTubeID } from './youtubeTranscript';
 
 /**
  * Checks if the given URL is a YouTube video link.
- * @param {string} url - The URL to check.
+ * @param {string} inputString - The URL to check.
  * @returns {boolean} - True if the URL is a YouTube video link, false otherwise.
  */
-export function isYouTubeVideoLink(url: string): boolean {
+export function containsValidYoutubeUrl(inputString: string): string | null {
   const youtubeRegex =
-    /^(https?:\/\/)?(www\.youtube\.com|m\.youtube\.com|youtube\.com|youtu\.be)\/.+$/;
-  const isYouTubeLink = youtubeRegex.test(url);
+    /https?:\/\/(www\.youtube\.com|m\.youtube\.com|youtube\.com|youtu\.be)\/[^\s]+/;
+  const match = inputString.match(youtubeRegex);
 
-  if (isYouTubeLink) {
+  if (match) {
+    const url = match[0];
     logger.info(`URL is a valid YouTube link format: ${url}`);
+    return url;
   } else {
-    logger.info(`URL is not a valid YouTube link: ${url}`);
+    logger.info(`No valid YouTube link found in input: ${inputString}`);
+    return null;
   }
-
-  return isYouTubeLink;
 }
 
 /**

@@ -4,9 +4,10 @@ import cors from 'cors';
 import extractValidUrl from './utils/extractValidUrl';
 import logger from './logger/logger';
 import processArticleLink from './mainProcess/processArticleLink';
-import { isYouTubeVideoLink } from './utils/youtubeValidation';
+import { containsValidYoutubeUrl } from './utils/youtubeValidation';
 import processYouTubeLink from './mainProcess/processYoutubeLink';
 import dotenv from 'dotenv';
+import { specialCasesCheck } from './utils/specialCaseUrlChecks';
 dotenv.config();
 
 const app = express();
@@ -30,14 +31,16 @@ app.post('/check-clickbait', async (req: Request, res: Response) => {
   }
 
   try {
-    if (isYouTubeVideoLink(url)) {
-      await processYouTubeLink(url, res, apiKey);
+    const youTubeVideoLink = containsValidYoutubeUrl(url);
+    if (youTubeVideoLink) {
+      await processYouTubeLink(youTubeVideoLink, res, apiKey);
     } else {
       const validUrl = await extractValidUrl(url);
       if (!validUrl) {
         return res.status(400).send('Invalid URL');
       }
-      await processArticleLink(validUrl, res, apiKey);
+      const finalUrl = specialCasesCheck(validUrl);
+      await processArticleLink(finalUrl, res, apiKey);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

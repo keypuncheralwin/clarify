@@ -44,6 +44,7 @@ async function processArticleLink(
     content
   );
   logger.info('Generated prompt');
+  logger.info(`Prompt: ${prompt}`);
 
   try {
     const response = await getChatResponse(prompt, chatSession);
