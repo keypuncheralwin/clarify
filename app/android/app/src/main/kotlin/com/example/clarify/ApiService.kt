@@ -10,9 +10,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import android.util.Log
 import org.yaml.snakeyaml.Yaml
+import java.util.concurrent.TimeUnit
 
 class ApiService(private val context: Context) {
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+    
     private val url = readConfig()
 
     suspend fun analyzeLink(link: String): ClickbaitResponse = withContext(Dispatchers.IO) {
@@ -23,10 +29,13 @@ class ApiService(private val context: Context) {
             .post(requestBody)
             .build()
         Log.d("ApiService", "Request: $requestBody")
+        
         val response = client.newCall(request).execute()
         if (!response.isSuccessful) throw Exception("Unexpected code $response")
+        
         val responseBody = response.body?.string() ?: throw Exception("Response body is null")
         Log.d("ApiService", "Response: $responseBody")
+        
         val jsonResponse = JSONObject(responseBody).getJSONObject("response")
         ClickbaitResponse(
             title = jsonResponse.getString("title"),
