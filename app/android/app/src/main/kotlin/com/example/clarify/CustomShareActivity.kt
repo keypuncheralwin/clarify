@@ -2,6 +2,8 @@ package com.example.clarify
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +21,7 @@ class CustomShareActivity : Activity() {
     private lateinit var shimmerTitle: ShimmerFrameLayout
     private lateinit var shimmerContent: ShimmerFrameLayout
     private lateinit var titleTextView: TextView
+    private lateinit var clarityScoreTextView: TextView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
 
@@ -48,6 +51,7 @@ class CustomShareActivity : Activity() {
         shimmerTitle = bottomSheetView.findViewById(R.id.shimmerTitle)
         shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
+        clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
     }
@@ -82,13 +86,26 @@ class CustomShareActivity : Activity() {
         shimmerContent.stopShimmer()
         shimmerContent.visibility = View.GONE
 
+        clarityScoreTextView.visibility = View.VISIBLE
         titleTextView.visibility = View.VISIBLE
         clickbaitTextView.visibility = if (result.answer.isNullOrBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 
+        clarityScoreTextView.text = "Clarity Score: ${result.clarityScore}"
+        val background = clarityScoreTextView.background as GradientDrawable
+        background.setColor(getClarityScoreColor(result.clarityScore))
         titleTextView.text = result.title
         clickbaitTextView.text = result.answer
         summaryTextView.text = result.summary
+    }
+
+    private fun getClarityScoreColor(score: Int): Int {
+        return when (score) {
+            in 0..4 -> Color.parseColor("#fe2712")
+            in 5..6 -> Color.parseColor("#fb9902")
+            in 7..10 -> Color.parseColor("#66b032")
+            else -> Color.GRAY
+        }
     }
 
     private fun displayError() {

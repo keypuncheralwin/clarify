@@ -42,7 +42,8 @@ class ApiService(private val context: Context) {
             isClickBait = jsonResponse.getBoolean("isClickBait"),
             explanation = jsonResponse.getString("explanation"),
             summary = jsonResponse.getString("summary"),
-            answer = jsonResponse.optString("answer") // Get the answer field if it exists
+            clarityScore = jsonResponse.getInt("clarityScore"), 
+            answer = jsonResponse.optString("answer")
         )
     }  
     
@@ -61,5 +62,7 @@ data class ClickbaitResponse(
     val isClickBait: Boolean,
     val explanation: String,
     val summary: String,
+    val clarityScore: Int,
     val answer: String? = null
 )
+
