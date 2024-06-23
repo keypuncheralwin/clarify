@@ -5,7 +5,7 @@ import {
   getBase64ImageFromUrl,
   getYouTubeThumbnailUrls,
 } from '../utils/youtubeValidation';
-import { extractJson } from '../utils/general';
+import { addClarityScoreDefinition, extractJson } from '../utils/general';
 import {
   extractYouTubeID,
   fetchTranscript,
@@ -69,9 +69,15 @@ async function processYouTubeLink(
       .map((part: { text: string }) => part.text)
       .join(' ');
 
-    const response = extractJson(data);
-    logger.info('Response received from AI model', { response });
-    res.json({ response });
+    let response = extractJson(data);
+    if (response) {
+      response = addClarityScoreDefinition(response, 'youtube');
+      logger.info(`Received response: ${JSON.stringify(response)}`);
+      res.json({ response });
+    } else {
+      logger.error('No response received from the chat session');
+      res.status(500).send('Internal Server Error');
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {

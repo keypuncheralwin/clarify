@@ -50,3 +50,6 @@ export const generateClickbaitYouTubePrompt = (
       }
     `;
 };
+
+export const clarityScoreDefinitionYoutube =
+  "The clarity score is a measure from 0 to 10 indicating how clear and accurate the title and thumbnail is, with higher scores indicating greater clarity and accuracy. The reason behind this video's clarity score: \n";

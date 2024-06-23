@@ -4,7 +4,7 @@ import { generateClickbaitArticlePrompt } from '../constants/article';
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import fetchArticle from '../utils/fetchArticle';
-import { getChatResponse } from '../utils/general';
+import { addClarityScoreDefinition, getChatResponse } from '../utils/general';
 
 /**
  * Process the article link and handle the entire flow.
@@ -47,9 +47,10 @@ async function processArticleLink(
   logger.info(`Prompt: ${prompt}`);
 
   try {
-    const response = await getChatResponse(prompt, chatSession);
+    let response = await getChatResponse(prompt, chatSession);
 
     if (response) {
+      response = addClarityScoreDefinition(response, 'article');
       logger.info(`Received response: ${JSON.stringify(response)}`);
       res.json({ response });
     } else {

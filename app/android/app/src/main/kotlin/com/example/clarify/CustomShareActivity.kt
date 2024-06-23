@@ -6,9 +6,14 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.LinearLayout
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -24,6 +29,8 @@ class CustomShareActivity : Activity() {
     private lateinit var clarityScoreTextView: TextView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
+    private var tooltipWindow: PopupWindow? = null
+    private var currentExplanation: String? = null
 
     private val apiService by lazy { ApiService(applicationContext) }
 
@@ -54,6 +61,14 @@ class CustomShareActivity : Activity() {
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
+
+        bottomSheetView.setOnClickListener {
+            hideTooltip()
+        }
+
+        clarityScoreTextView.setOnClickListener {
+            currentExplanation?.let { explanation -> showTooltip(explanation, it) }
+        }
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -71,6 +86,7 @@ class CustomShareActivity : Activity() {
             coroutineScope.launch {
                 try {
                     val result = apiService.analyzeLink(sharedText)
+                    currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
                     Log.e("CustomShareActivity", "Error analyzing link", e)
@@ -116,6 +132,25 @@ class CustomShareActivity : Activity() {
 
         titleTextView.visibility = View.VISIBLE
         titleTextView.text = "Failed to analyze link"
+    }
+
+    private fun showTooltip(explanation: String, anchor: View) {
+        val tooltipView = LayoutInflater.from(this).inflate(R.layout.tooltip_layout, null)
+        val explanationTextView = tooltipView.findViewById<TextView>(R.id.explanationTextView)
+        val closeTooltipButton = tooltipView.findViewById<ImageView>(R.id.closeTooltipButton)
+        explanationTextView.text = explanation
+
+        tooltipWindow = PopupWindow(tooltipView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, true)
+        tooltipWindow?.showAsDropDown(anchor, 0, 20, Gravity.TOP or Gravity.START)
+
+        closeTooltipButton.setOnClickListener {
+            hideTooltip()
+        }
+    }
+
+    private fun hideTooltip() {
+        tooltipWindow?.dismiss()
+        tooltipWindow = null
     }
 
     override fun onDestroy() {

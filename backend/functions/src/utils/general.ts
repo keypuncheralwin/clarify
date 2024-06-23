@@ -1,8 +1,10 @@
-import { clickbaitResponse } from '../types/general';
+import { ClickbaitResponse } from '../types/general';
 import logger from '../logger/logger';
 import { ChatSession } from '@google/generative-ai';
+import { clarityScoreDefinitionArticle } from '../constants/article';
+import { clarityScoreDefinitionYoutube } from '../constants/youtube';
 
-export const extractJson = (str: string): clickbaitResponse | null => {
+export const extractJson = (str: string): ClickbaitResponse | null => {
   try {
     const jsonMatch = str.match(/{.*}/s);
     if (jsonMatch) {
@@ -22,7 +24,7 @@ export const extractJson = (str: string): clickbaitResponse | null => {
 export const getChatResponse = async (
   prompt: string,
   chatSession: ChatSession
-): Promise<clickbaitResponse | null> => {
+): Promise<ClickbaitResponse | null> => {
   try {
     const result = await chatSession.sendMessage(prompt);
     const responseText = await result.response.text();
@@ -32,4 +34,18 @@ export const getChatResponse = async (
     logger.error('Error processing article', error);
     return null;
   }
+};
+
+export const addClarityScoreDefinition = (
+  response: ClickbaitResponse,
+  type: 'youtube' | 'article'
+): ClickbaitResponse => {
+  const clarityScoreDefinition =
+    type === 'youtube'
+      ? clarityScoreDefinitionYoutube
+      : clarityScoreDefinitionArticle;
+  return {
+    ...response,
+    explanation: clarityScoreDefinition + response.explanation,
+  };
 };
