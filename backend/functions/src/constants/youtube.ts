@@ -1,8 +1,8 @@
 const clickbaitCriteriaForYouTube = `
   When evaluating whether the YouTube video thumbnail or title is clickbait, please consider the following criteria. Each criterion should be scored on a scale of 0-2:
-  - **0**: Does not apply.
+  - **0**: Fully applies (indicating clickbait).
   - **1**: Partially applies.
-  - **2**: Fully applies.
+  - **2**: Does not apply (indicating clarity).
 
   1. Does the title or thumbnail exaggerate or sensationalize the content to attract clicks?
      - Look for words or images that seem overly dramatic or extreme compared to the video content.
@@ -16,7 +16,7 @@ const clickbaitCriteriaForYouTube = `
   4. The title or thumbnail can use emotionally charged words, phrases, or imagery to provoke a reaction as long as the video backs up the claims.
      - Ensure that any strong emotional appeal in the title or thumbnail is justified by the video content.
 
-  Calculate the total score based on the above criteria. If the total score is 5 or higher out of 10, consider the video clickbait. Otherwise, it is not clickbait.
+  Calculate the total clarity score based on the above criteria. If the total clarity score is 5 or lower out of 10, consider the video clickbait. Otherwise, it is not clickbait.
 
   Please follow these criteria closely and provide specific evidence from the video content for your conclusions.
 `;
@@ -34,7 +34,7 @@ export const generateClickbaitYouTubePrompt = (
   
       ${clickbaitCriteriaForYouTube}
   
-      1. Based on the above criteria, score each criterion on a scale of 0-2 and calculate the total score. Is the video clickbait? If the total score is 5 or higher, consider it clickbait.
+      1. Based on the above criteria, score each criterion on a scale of 0-2 and calculate the total clarity score. Is the video clickbait? If the total clarity score is 5 or lower, consider it clickbait.
       2. If the video is clickbait, explain why in one sentence using the video content as evidence but don't use the word clickbait. Provide clear examples from the content that support your explanation.
       3. Extract the answer to the question posed in the title or thumbnail (if there is one) from the video content.
       4. Provide a brief summary of the video content.
@@ -43,7 +43,7 @@ export const generateClickbaitYouTubePrompt = (
       {
           "title": "string",
           "isClickBait": "boolean",
-          "totalScore": number,
+          "clarityScore": number,
           "explanation": "string",
           "answer": "string",
           "summary": "string"
