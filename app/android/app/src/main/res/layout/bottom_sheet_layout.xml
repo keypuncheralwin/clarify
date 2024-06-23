@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         
@@ -12,14 +12,28 @@
             android:id="@+id/closeButton"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_gravity="end|top"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
             android:background="@drawable/circular_button_background"
             android:padding="2dp"
             android:src="@drawable/ic_close_black"
             android:contentDescription="@string/close"
             android:layout_marginEnd="1dp"
-            android:layout_marginTop="1dp"/>
-    </FrameLayout>
+            android:layout_marginTop="5dp"/>
+        
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_toStartOf="@id/closeButton"
+            android:text="Title"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -30,28 +44,15 @@
         android:indeterminate="true" />
 
     <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Title"
-        android:textColor="@android:color/black" />
-
-    <TextView
         android:id="@+id/clickbaitTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:text="Clickbait"
-        android:textColor="@android:color/black" />
-
-    <TextView
-        android:id="@+id/explanationTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Explanation"
-        android:textColor="@android:color/black" />
+        android:text="Subtitle"
+        android:textColor="@android:color/black"
+        android:textStyle="italic"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/summaryTextView"
@@ -59,6 +60,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:text="Summary"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        android:layout_marginTop="8dp"/>
 
 </LinearLayout>

@@ -20,7 +20,6 @@ class CustomShareActivity : Activity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var titleTextView: TextView
     private lateinit var clickbaitTextView: TextView
-    private lateinit var explanationTextView: TextView
     private lateinit var summaryTextView: TextView
 
     private val apiService by lazy { ApiService(applicationContext) }
@@ -53,7 +52,6 @@ class CustomShareActivity : Activity() {
         progressBar = bottomSheetView.findViewById(R.id.progressBar)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
-        explanationTextView = bottomSheetView.findViewById(R.id.explanationTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
     }
 
@@ -84,14 +82,13 @@ class CustomShareActivity : Activity() {
     private fun displayResult(result: ClickbaitResponse) {
         progressBar.visibility = View.GONE
         titleTextView.visibility = View.VISIBLE
-        clickbaitTextView.visibility = View.VISIBLE
-        explanationTextView.visibility = View.VISIBLE
+        clickbaitTextView.visibility = if (result.answer.isNullOrBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
-        titleTextView.text = "Title: ${result.title}"
-        clickbaitTextView.text = "Is Clickbait: ${if (result.isClickBait) "Yes" else "No"}"
-        explanationTextView.text = "Explanation: ${result.explanation}"
-        summaryTextView.text = "Summary: ${result.summary}"
-    }
+    
+        titleTextView.text = result.title
+        clickbaitTextView.text = result.answer
+        summaryTextView.text = result.summary
+    }    
 
     private fun displayError() {
         progressBar.visibility = View.GONE

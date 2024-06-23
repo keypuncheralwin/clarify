@@ -29,21 +29,23 @@ class ApiService(private val context: Context) {
             .post(requestBody)
             .build()
         Log.d("ApiService", "Request: $requestBody")
-        
+    
         val response = client.newCall(request).execute()
         if (!response.isSuccessful) throw Exception("Unexpected code $response")
-        
+    
         val responseBody = response.body?.string() ?: throw Exception("Response body is null")
         Log.d("ApiService", "Response: $responseBody")
-        
+    
         val jsonResponse = JSONObject(responseBody).getJSONObject("response")
         ClickbaitResponse(
             title = jsonResponse.getString("title"),
             isClickBait = jsonResponse.getBoolean("isClickBait"),
             explanation = jsonResponse.getString("explanation"),
-            summary = jsonResponse.getString("summary")
+            summary = jsonResponse.getString("summary"),
+            answer = jsonResponse.optString("answer") // Get the answer field if it exists
         )
-    }
+    }  
+    
 
     private fun readConfig(): String {
         val assetManager = context.assets
@@ -58,5 +60,6 @@ data class ClickbaitResponse(
     val title: String,
     val isClickBait: Boolean,
     val explanation: String,
-    val summary: String
+    val summary: String,
+    val answer: String? = null
 )
