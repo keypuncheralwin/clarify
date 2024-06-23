@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Clarify</string>
-    <string name="close">Close</string>
+    <string name="close_indicator">Slide down to close</string>
 </resources>

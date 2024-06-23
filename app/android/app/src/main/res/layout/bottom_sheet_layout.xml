@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -7,41 +8,68 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        
-        <ImageView
-            android:id="@+id/closeButton"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/circular_button_background"
-            android:padding="2dp"
-            android:src="@drawable/ic_close_black"
-            android:contentDescription="@string/close"
-            android:layout_marginEnd="1dp"
-            android:layout_marginTop="5dp"/>
+
+        <View
+            android:id="@+id/closeIndicator"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/dash_background"
+            android:contentDescription="@string/close_indicator"/>
         
         <TextView
             android:id="@+id/titleTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_toStartOf="@id/closeButton"
+            android:layout_below="@id/closeIndicator"
             android:text="Title"
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_alignParentStart="true"
+            android:layout_marginTop="12dp"
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:indeterminate="true" />
+        app:shimmer_auto_start="true"
+        app:shimmer_duration="1000">
+        
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:background="@android:color/darker_gray" />
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:shimmer_auto_start="true"
+        app:shimmer_duration="1000"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:background="@android:color/darker_gray" />
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <TextView
         android:id="@+id/clickbaitTextView"

@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.*
@@ -17,7 +17,8 @@ class CustomShareActivity : Activity() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var bottomSheetDialog: BottomSheetDialog
-    private lateinit var progressBar: ProgressBar
+    private lateinit var shimmerTitle: ShimmerFrameLayout
+    private lateinit var shimmerContent: ShimmerFrameLayout
     private lateinit var titleTextView: TextView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
@@ -44,12 +45,8 @@ class CustomShareActivity : Activity() {
             finish()
         }
 
-        val closeButton: ImageView = bottomSheetView.findViewById(R.id.closeButton)
-        closeButton.setOnClickListener {
-            bottomSheetDialog.dismiss()
-        }
-
-        progressBar = bottomSheetView.findViewById(R.id.progressBar)
+        shimmerTitle = bottomSheetView.findViewById(R.id.shimmerTitle)
+        shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
@@ -80,18 +77,26 @@ class CustomShareActivity : Activity() {
     }
 
     private fun displayResult(result: ClickbaitResponse) {
-        progressBar.visibility = View.GONE
+        shimmerTitle.stopShimmer()
+        shimmerTitle.visibility = View.GONE
+        shimmerContent.stopShimmer()
+        shimmerContent.visibility = View.GONE
+
         titleTextView.visibility = View.VISIBLE
         clickbaitTextView.visibility = if (result.answer.isNullOrBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
-    
+
         titleTextView.text = result.title
         clickbaitTextView.text = result.answer
         summaryTextView.text = result.summary
-    }    
+    }
 
     private fun displayError() {
-        progressBar.visibility = View.GONE
+        shimmerTitle.stopShimmer()
+        shimmerTitle.visibility = View.GONE
+        shimmerContent.stopShimmer()
+        shimmerContent.visibility = View.GONE
+
         titleTextView.visibility = View.VISIBLE
         titleTextView.text = "Failed to analyze link"
     }
