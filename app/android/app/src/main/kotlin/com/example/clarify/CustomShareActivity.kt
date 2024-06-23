@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ProgressBar
 import android.widget.TextView
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,6 +38,7 @@ class CustomShareActivity : Activity() {
 
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
 
         bottomSheetDialog.setOnDismissListener {
             Log.d("CustomShareActivity", "Bottom sheet dismissed")

@@ -14,7 +14,7 @@
             android:layout_width="40dp"
             android:layout_height="4dp"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/dash_background"
             android:contentDescription="@string/close_indicator"/>
         
@@ -28,7 +28,7 @@
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
@@ -37,7 +37,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:shimmer_auto_start="true"
-        app:shimmer_duration="1000">
+        app:shimmer_duration="1000"
+        android:layout_marginTop="16dp">
         
         <View
             android:layout_width="match_parent"
@@ -51,7 +52,7 @@
         android:layout_height="wrap_content"
         app:shimmer_auto_start="true"
         app:shimmer_duration="1000"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
