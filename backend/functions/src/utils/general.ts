@@ -1,6 +1,6 @@
 import { ClickbaitResponse } from '../types/general';
 import logger from '../logger/logger';
-import { ChatSession } from '@google/generative-ai';
+import { ChatSession, Part } from '@google/generative-ai';
 import { clarityScoreDefinitionArticle } from '../constants/article';
 import { clarityScoreDefinitionYoutube } from '../constants/youtube';
 
@@ -22,16 +22,16 @@ export const extractJson = (str: string): ClickbaitResponse | null => {
 };
 
 export const getChatResponse = async (
-  prompt: string,
+  prompt: string | Array<string | Part>,
   chatSession: ChatSession
 ): Promise<ClickbaitResponse | null> => {
   try {
     const result = await chatSession.sendMessage(prompt);
-    const responseText = await result.response.text();
+    const responseText = result.response.text();
     logger.info('Response text received', { responseText });
     return extractJson(responseText);
   } catch (error) {
-    logger.error('Error processing article', error);
+    logger.error('Error processing prompt', error);
     return null;
   }
 };

@@ -1,18 +1,22 @@
-import axios from 'axios';
 import { Response } from 'express';
 import logger from '../logger/logger';
 import {
   getBase64ImageFromUrl,
   getYouTubeThumbnailUrls,
 } from '../utils/youtubeValidation';
-import { addClarityScoreDefinition, extractJson } from '../utils/general';
+import { addClarityScoreDefinition, getChatResponse } from '../utils/general';
 import {
   extractYouTubeID,
   fetchTranscript,
   YoutubeTranscriptError,
 } from '../utils/youtubeTranscript';
-import { generateClickbaitYouTubePrompt } from '../constants/youtube';
-import { safetySettings } from '../constants/gemini';
+import { geminiYoutubeContext, generateClickbaitYouTubePrompt } from '../constants/youtube';
+import { safetySettings, generationConfig } from '../constants/gemini';
+import { GoogleGenerativeAI, FileDataPart, TextPart } from '@google/generative-ai';
+import { GoogleAIFileManager } from '@google/generative-ai/files';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -42,34 +46,51 @@ async function processYouTubeLink(
 
     const prompt = generateClickbaitYouTubePrompt(videoTitle, transcriptText);
 
-    const payload = {
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: 'image/jpeg',
-                data: thumbnailBase64,
-              },
-            },
-          ],
-        },
-      ],
+    // Initialize the Gemini model and start a chat session
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+    });
+
+    const fileManager = new GoogleAIFileManager(apiKey);
+    
+    // Convert base64 string to buffer
+    const buffer = Buffer.from(thumbnailBase64, 'base64');
+
+    // Create a temporary file for the buffer
+    const tmpFilePath = path.join(os.tmpdir(), 'thumbnail.jpg');
+    fs.writeFileSync(tmpFilePath, buffer);
+
+    // Upload the temporary file
+    const uploadResult = await fileManager.uploadFile(tmpFilePath, {
+      mimeType: 'image/jpeg',
+      displayName: 'thumbnail.jpg',
+    });
+
+    // Remove the temporary file after upload
+    fs.unlinkSync(tmpFilePath);
+
+    const fileUri = uploadResult.file.uri;
+
+    const chatSession = model.startChat({
       safetySettings,
-    };
+      generationConfig,
+      history: geminiYoutubeContext
+    });
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const headers = {
-      'Content-Type': 'application/json',
-    };
+    // Create the message with the image URI and prompt
+    const messageParts: (TextPart | FileDataPart)[] = [
+      { text: prompt },
+      {
+        fileData: {
+          mimeType: 'image/jpeg',
+          fileUri,
+        },
+      },
+    ];
 
-    const result = await axios.post(apiUrl, payload, { headers });
-    const data = result.data.candidates[0].content.parts
-      .map((part: { text: string }) => part.text)
-      .join(' ');
+    let response = await getChatResponse(messageParts, chatSession);
 
-    let response = extractJson(data);
     if (response) {
       response = addClarityScoreDefinition(response, 'youtube');
       logger.info(`Received response: ${JSON.stringify(response)}`);
@@ -78,7 +99,6 @@ async function processYouTubeLink(
       logger.error('No response received from the chat session');
       res.status(500).send('Internal Server Error');
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);
