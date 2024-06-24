@@ -2,7 +2,9 @@ import { Article } from '../types/article';
 import logger from '../logger/logger';
 import { extract } from '@extractus/article-extractor';
 
-export default async function fetchArticle(url: string): Promise<Article | null> {
+export default async function fetchArticle(
+  url: string
+): Promise<Article | null> {
   const article = await extract(url);
   if (!article?.title || !article?.content) {
     logger.warn(`No article found at URL: ${url}`);
@@ -10,7 +12,10 @@ export default async function fetchArticle(url: string): Promise<Article | null>
   }
   logger.info(`Article extracted successfully`);
   logger.info(`Title: ${article.title}`);
-  const truncatedContent = article.content.length > 100 ? `${article.content.slice(0, 100)}...` : article.content;
+  const truncatedContent =
+    article.content.length > 100
+      ? `${article.content.slice(0, 100)}...`
+      : article.content;
   logger.info(`Content: ${truncatedContent}`);
   return {
     title: article.title,

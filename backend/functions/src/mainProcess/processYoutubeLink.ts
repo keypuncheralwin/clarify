@@ -10,9 +10,16 @@ import {
   fetchTranscript,
   YoutubeTranscriptError,
 } from '../utils/youtubeTranscript';
-import { geminiYoutubeContext, generateClickbaitYouTubePrompt } from '../constants/youtube';
+import {
+  geminiYoutubeContext,
+  generateClickbaitYouTubePrompt,
+} from '../constants/youtube';
 import { safetySettings, generationConfig } from '../constants/gemini';
-import { GoogleGenerativeAI, FileDataPart, TextPart } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  FileDataPart,
+  TextPart,
+} from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/files';
 import fs from 'fs';
 import path from 'path';
@@ -53,7 +60,7 @@ async function processYouTubeLink(
     });
 
     const fileManager = new GoogleAIFileManager(apiKey);
-    
+
     // Convert base64 string to buffer
     const buffer = Buffer.from(thumbnailBase64, 'base64');
 
@@ -75,7 +82,7 @@ async function processYouTubeLink(
     const chatSession = model.startChat({
       safetySettings,
       generationConfig,
-      history: geminiYoutubeContext
+      history: geminiYoutubeContext,
     });
 
     // Create the message with the image URI and prompt
@@ -99,6 +106,7 @@ async function processYouTubeLink(
       logger.error('No response received from the chat session');
       res.status(500).send('Internal Server Error');
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);

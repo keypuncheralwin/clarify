@@ -1,6 +1,9 @@
 import { Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { geminiArticleContext, generateClickbaitArticlePrompt } from '../constants/article';
+import {
+  geminiArticleContext,
+  generateClickbaitArticlePrompt,
+} from '../constants/article';
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import fetchArticle from '../utils/fetchArticle';
@@ -31,12 +34,12 @@ async function processArticleLink(
 
   const { title, subtitle, content } = article;
   logger.info(`Fetched article: ${title}`);
-  
+
   // Start the chat session with the preloaded history
   const chatSession = model.startChat({
     safetySettings,
     generationConfig,
-    history: geminiArticleContext 
+    history: geminiArticleContext,
   });
 
   const prompt: string = generateClickbaitArticlePrompt(
