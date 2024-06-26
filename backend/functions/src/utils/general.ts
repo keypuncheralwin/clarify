@@ -6,9 +6,21 @@ import { clarityScoreDefinitionYoutube } from '../constants/youtube';
 
 export const extractJson = (str: string): ClickbaitResponse | null => {
   try {
-    const jsonMatch = str.match(/{.*}/s);
+    // Remove backticks and 'json' string from the beginning and end
+    let cleanStr = str.replace(/```json\s*|```/g, '');
+
+    // Strip unwanted control characters
+    // eslint-disable-next-line no-control-regex
+    cleanStr = cleanStr.replace(/[\u0000-\u001F]/g, '');
+
+    // Attempt to match the JSON object within the cleaned string
+    const jsonMatch = cleanStr.match(/(\{.*\})/s);
+
     if (jsonMatch) {
-      const jsonResponse = JSON.parse(jsonMatch[0]);
+      const jsonStr = jsonMatch[1];
+
+      // Attempt to parse the JSON
+      const jsonResponse = JSON.parse(jsonStr);
       logger.info('JSON successfully extracted', { jsonResponse });
       return jsonResponse;
     } else {

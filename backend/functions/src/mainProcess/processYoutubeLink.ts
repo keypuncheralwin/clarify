@@ -11,7 +11,7 @@ import {
   YoutubeTranscriptError,
 } from '../utils/youtubeTranscript';
 import {
-  geminiYoutubeContext,
+  clickbaitCriteriaForYouTube,
   generateClickbaitYouTubePrompt,
 } from '../constants/youtube';
 import { safetySettings, generationConfig } from '../constants/gemini';
@@ -57,6 +57,7 @@ async function processYouTubeLink(
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
+      systemInstruction: clickbaitCriteriaForYouTube,
     });
 
     const fileManager = new GoogleAIFileManager(apiKey);
@@ -82,7 +83,6 @@ async function processYouTubeLink(
     const chatSession = model.startChat({
       safetySettings,
       generationConfig,
-      history: geminiYoutubeContext,
     });
 
     // Create the message with the image URI and prompt
