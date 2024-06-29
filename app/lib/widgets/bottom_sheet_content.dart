@@ -14,6 +14,7 @@ class BottomSheetContent extends StatefulWidget {
 class BottomSheetContentState extends State<BottomSheetContent> {
   late bool _isLoading;
   Map<String, dynamic>? _result;
+  OverlayEntry? _tooltipOverlay;
 
   @override
   void initState() {
@@ -42,83 +43,108 @@ class BottomSheetContentState extends State<BottomSheetContent> {
   }
 
   void _showTooltip(BuildContext context, String explanation, Offset position) {
-    OverlayState? overlayState = Overlay.of(context);
-    late OverlayEntry overlayEntry;
+    _removeTooltip(); // Ensure any existing tooltip is removed
 
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        left: position.dx,
-        top: position.dy + 40,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width - 32,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: 8, // Move closer to the top right corner
-                  top: 8, // Move closer to the top right corner
-                  child: GestureDetector(
-                    onTap: () {
-                      overlayEntry.remove();
-                    },
-                    child: const Icon(Icons.close, color: Colors.white70, size: 20),
+    OverlayState? overlayState = Overlay.of(context);
+
+    _tooltipOverlay = OverlayEntry(
+      builder: (context) => GestureDetector(
+        onTap: () {
+          _removeTooltip();
+        },
+        behavior: HitTestBehavior.translucent,
+        child: Stack(
+          children: [
+            Positioned(
+              left: position.dx,
+              top: position.dy + 40,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: MediaQuery.of(context).size.width - 32,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 25.0, right: 0, left: 0, bottom: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 15),
-                        child: Text(
-                        explanation,
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            _removeTooltip();
+                          },
+                          child: const Icon(Icons.close, color: Colors.white70, size: 20),
+                        ),
                       ),
-                      )
+                      Padding(
+                        padding: const EdgeInsets.only(top: 25.0, right: 0, left: 0, bottom: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 15),
+                              child: Text(
+                                explanation,
+                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
 
-    overlayState.insert(overlayEntry);
+    overlayState?.insert(_tooltipOverlay!);
+  }
+
+  void _removeTooltip() {
+    _tooltipOverlay?.remove();
+    _tooltipOverlay = null;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              width: 40,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[600],
-                borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: () {
+        if (_tooltipOverlay != null) {
+          _removeTooltip();
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-          ),
-          _isLoading
-              ? _buildLoadingContent()
-              : _result != null
-                  ? _buildResultContent(_result!)
-                  : const Text('No data available'),
-        ],
+            _isLoading
+                ? _buildLoadingContent()
+                : _result != null
+                    ? _buildResultContent(_result!)
+                    : const Text('No data available'),
+          ],
+        ),
       ),
     );
   }
