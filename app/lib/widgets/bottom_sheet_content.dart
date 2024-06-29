@@ -143,7 +143,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         const SizedBox(height: 10),
         Text(
           summary,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 14),
         ),
       ],
     );
