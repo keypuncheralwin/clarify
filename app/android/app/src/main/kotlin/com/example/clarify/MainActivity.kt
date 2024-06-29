@@ -24,6 +24,8 @@ class MainActivity : FlutterActivity() {
                             result.success(mapOf(
                                 "title" to response.title,
                                 "isClickBait" to response.isClickBait,
+                                "clarityScore" to response.clarityScore,
+                                "answer" to response.answer,
                                 "explanation" to response.explanation,
                                 "summary" to response.summary
                             ))
