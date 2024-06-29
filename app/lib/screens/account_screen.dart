@@ -53,6 +53,24 @@ class AccountScreen extends StatelessWidget {
                 // Implement clear history functionality
               },
             ),
+            _buildListTile(
+              context,
+              icon: Icons.brightness_6,
+              title: 'Dark Mode',
+              trailing: Transform.scale(
+                scale: 0.8, // Adjust scale as necessary
+                child: Switch(
+                  value: true,
+                  onChanged: (bool value) {
+                    // Implement dark mode toggle functionality
+                  },
+                  activeColor: Colors.white,
+                  activeTrackColor: Colors.grey,
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: Colors.grey[300],
+                ),
+              ),
+            ),
             const SizedBox(height: 40),
             const Text(
               'Support Indie Devs',
