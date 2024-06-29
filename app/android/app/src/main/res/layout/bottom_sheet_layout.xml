@@ -107,6 +107,7 @@
         android:visibility="gone"
         android:text="Summary"
         android:textColor="@android:color/black"
+        android:textSize="14sp"
         android:layout_marginTop="8dp"/>
 
 </LinearLayout>

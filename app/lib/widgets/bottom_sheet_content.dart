@@ -41,6 +41,59 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     }
   }
 
+  void _showTooltip(BuildContext context, String explanation, Offset position) {
+    OverlayState? overlayState = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: position.dx,
+        top: position.dy + 40,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width - 32,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: 8, // Move closer to the top right corner
+                  top: 8, // Move closer to the top right corner
+                  child: GestureDetector(
+                    onTap: () {
+                      overlayEntry.remove();
+                    },
+                    child: const Icon(Icons.close, color: Colors.white70, size: 20),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 25.0, right: 0, left: 0, bottom: 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 15),
+                        child: Text(
+                        explanation,
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlayState.insert(overlayEntry);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -112,6 +165,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     final title = result['title'] ?? 'No title available';
     final clarityScore = result['clarityScore']?.toString() ?? 'N/A';
     final clarityScoreValue = result['clarityScore'] ?? -1;
+    final explanation = result['explanation'] ?? 'No explanation available';
     final answer = result['answer'] ?? 'No answer available';
     final summary = result['summary'] ?? 'No summary available';
 
@@ -124,16 +178,27 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: _getClarityScoreColor(clarityScoreValue),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'Clarity Score: $clarityScore',
-            style: const TextStyle(color: Colors.white),
-          ),
+        Builder(
+          builder: (context) {
+            return GestureDetector(
+              onTap: () {
+                final RenderBox renderBox = context.findRenderObject() as RenderBox;
+                final Offset position = renderBox.localToGlobal(Offset.zero);
+                _showTooltip(context, explanation, position);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getClarityScoreColor(clarityScoreValue),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Clarity Score: $clarityScore',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: 10),
         Text(
@@ -143,7 +208,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         const SizedBox(height: 10),
         Text(
           summary,
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 16),
         ),
       ],
     );
