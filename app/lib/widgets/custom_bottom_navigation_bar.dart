@@ -18,7 +18,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             _buildNavItem(Icons.home, 'Home', 0),
-            _buildNavItem(Icons.history, 'History', 1),
+            _buildNavItem(Icons.favorite, 'Favorites', 1), // Updated icon and label
             _buildNavItem(Icons.account_circle, 'Account', 2),
           ],
         ),

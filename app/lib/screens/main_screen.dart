@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:clarify/screens/home_screen.dart';
-import 'package:clarify/screens/history_screen.dart';
+import 'package:clarify/screens/favorites_screen.dart'; // Updated import
 import 'package:clarify/screens/account_screen.dart';
 import 'package:clarify/widgets/custom_bottom_navigation_bar.dart';
 import 'package:clarify/widgets/bottom_sheet_content.dart';
@@ -22,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _children = [
     const HomeScreen(),
-    const HistoryScreen(),
+    const FavoritesScreen(), // Updated to FavoritesScreen
     const AccountScreen(),
   ];
 
