@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:clarify/screens/home_screen.dart';
-import 'package:clarify/screens/favorites_screen.dart'; // Updated import
+import 'package:clarify/screens/favorites_screen.dart';
 import 'package:clarify/screens/account_screen.dart';
 import 'package:clarify/widgets/custom_bottom_navigation_bar.dart';
 import 'package:clarify/widgets/bottom_sheet_content.dart';
@@ -22,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _children = [
     const HomeScreen(),
-    const FavoritesScreen(), // Updated to FavoritesScreen
+    const FavoritesScreen(),
     const AccountScreen(),
   ];
 
@@ -75,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clarify'),
@@ -103,7 +104,10 @@ class _MainScreenState extends State<MainScreen> {
               backgroundColor: Colors.deepPurple,
               child: Transform.rotate(
                 angle: -0.785398, // -45 degrees in radians
-                child: const Icon(Icons.link),
+                child: const Icon(
+                  Icons.link,
+                  color:Colors.white,
+                ),
               ),
             )
           : null,

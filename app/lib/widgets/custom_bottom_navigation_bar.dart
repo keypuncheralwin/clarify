@@ -8,25 +8,27 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1F1F1F),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1F1F1F) : const Color(0xFFF5F5F5),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            _buildNavItem(Icons.home, 'Home', 0),
-            _buildNavItem(Icons.favorite, 'Favorites', 1), // Updated icon and label
-            _buildNavItem(Icons.account_circle, 'Account', 2),
+            _buildNavItem(Icons.home, 'Home', 0, isDarkMode),
+            _buildNavItem(Icons.favorite, 'Favorites', 1, isDarkMode),
+            _buildNavItem(Icons.account_circle, 'Account', 2, isDarkMode),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(IconData icon, String label, int index, bool isDarkMode) {
     return GestureDetector(
       onTap: () => onTabTapped(index),
       child: Column(
@@ -34,12 +36,12 @@ class CustomBottomNavigationBar extends StatelessWidget {
         children: <Widget>[
           Icon(
             icon,
-            color: currentIndex == index ? Colors.deepPurple : Colors.grey,
+            color: currentIndex == index ? Colors.deepPurple : (isDarkMode ? Colors.grey : Colors.black),
           ),
           Text(
             label,
             style: TextStyle(
-              color: currentIndex == index ? Colors.deepPurple : Colors.grey,
+              color: currentIndex == index ? Colors.deepPurple : (isDarkMode ? Colors.grey : Colors.black),
             ),
           ),
         ],

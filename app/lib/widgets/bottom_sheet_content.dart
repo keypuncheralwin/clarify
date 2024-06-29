@@ -113,6 +113,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         if (_tooltipOverlay != null) {
@@ -123,6 +125,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       },
       child: Container(
         padding: const EdgeInsets.all(16.0),
+        color: isDarkMode ? Colors.black : Colors.white,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,30 +136,33 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                 width: 40,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Colors.grey[600],
+                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
             _isLoading
-                ? _buildLoadingContent()
+                ? _buildLoadingContent(isDarkMode)
                 : _result != null
-                    ? _buildResultContent(_result!)
-                    : const Text('No data available'),
+                    ? _buildResultContent(_result!, isDarkMode)
+                    : Text(
+                        'No data available',
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                      ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLoadingContent() {
+  Widget _buildLoadingContent(bool isDarkMode) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Shimmer.fromColors(
-          baseColor: Colors.grey[700]!,
-          highlightColor: Colors.grey[500]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
           child: Container(
             width: double.infinity,
             height: 20,
@@ -165,8 +171,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         ),
         const SizedBox(height: 10),
         Shimmer.fromColors(
-          baseColor: Colors.grey[700]!,
-          highlightColor: Colors.grey[500]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
           child: Container(
             width: double.infinity,
             height: 20,
@@ -175,8 +181,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         ),
         const SizedBox(height: 10),
         Shimmer.fromColors(
-          baseColor: Colors.grey[700]!,
-          highlightColor: Colors.grey[500]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
           child: Container(
             width: double.infinity,
             height: 100,
@@ -187,7 +193,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     );
   }
 
-  Widget _buildResultContent(Map<String, dynamic> result) {
+  Widget _buildResultContent(Map<String, dynamic> result, bool isDarkMode) {
     final title = result['title'] ?? 'No title available';
     final clarityScore = result['clarityScore']?.toString() ?? 'N/A';
     final clarityScoreValue = result['clarityScore'] ?? -1;
@@ -201,7 +207,11 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         const SizedBox(height: 10),
         Builder(
@@ -229,12 +239,16 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         const SizedBox(height: 10),
         Text(
           answer,
-          style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+          style: TextStyle(
+            fontSize: 16,
+            fontStyle: FontStyle.italic,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         const SizedBox(height: 10),
         Text(
           summary,
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
         ),
       ],
     );

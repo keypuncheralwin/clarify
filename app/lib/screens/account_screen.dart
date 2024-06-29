@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:clarify/providers/theme_provider.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider).brightness == Brightness.dark;
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -28,12 +32,12 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            const Text(
+            Text(
               'General Settings',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -44,6 +48,7 @@ class AccountScreen extends StatelessWidget {
               onTap: () {
                 // Implement navigation to manage tokens
               },
+              isDarkMode: isDarkMode,
             ),
             _buildListTile(
               context,
@@ -52,6 +57,7 @@ class AccountScreen extends StatelessWidget {
               onTap: () {
                 // Implement clear history functionality
               },
+              isDarkMode: isDarkMode,
             ),
             _buildListTile(
               context,
@@ -60,9 +66,9 @@ class AccountScreen extends StatelessWidget {
               trailing: Transform.scale(
                 scale: 0.8, // Adjust scale as necessary
                 child: Switch(
-                  value: true,
+                  value: isDarkMode,
                   onChanged: (bool value) {
-                    // Implement dark mode toggle functionality
+                    ref.read(themeProvider.notifier).toggleTheme();
                   },
                   activeColor: Colors.white,
                   activeTrackColor: Colors.grey,
@@ -70,14 +76,15 @@ class AccountScreen extends StatelessWidget {
                   inactiveTrackColor: Colors.grey[300],
                 ),
               ),
+              isDarkMode: isDarkMode,
             ),
             const SizedBox(height: 40),
-            const Text(
+            Text(
               'Support Indie Devs',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -88,14 +95,15 @@ class AccountScreen extends StatelessWidget {
               onTap: () {
                 // Implement share with friends functionality
               },
+              isDarkMode: isDarkMode,
             ),
             const SizedBox(height: 40),
-            const Text(
+            Text(
               'About',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDarkMode ? Colors.white : Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -106,6 +114,7 @@ class AccountScreen extends StatelessWidget {
               onTap: () {
                 // Implement navigation to how to use
               },
+              isDarkMode: isDarkMode,
             ),
             _buildListTile(
               context,
@@ -114,12 +123,14 @@ class AccountScreen extends StatelessWidget {
               onTap: () {
                 // Implement contact us functionality
               },
+              isDarkMode: isDarkMode,
             ),
             _buildListTile(
               context,
               icon: Icons.info_outline,
               title: 'App Version',
               subtitle: '1.0.0', // Replace with actual app version
+              isDarkMode: isDarkMode,
             ),
           ],
         ),
@@ -132,17 +143,18 @@ class AccountScreen extends StatelessWidget {
       required String title,
       String? subtitle,
       Widget? trailing,
-      void Function()? onTap}) {
+      void Function()? onTap,
+      required bool isDarkMode}) {
     return ListTile(
-      leading: Icon(icon, color: Colors.white),
+      leading: Icon(icon, color: isDarkMode ? Colors.white : Colors.black),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
             )
           : null,
       trailing: trailing,
