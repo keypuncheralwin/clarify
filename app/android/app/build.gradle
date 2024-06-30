@@ -65,4 +65,5 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.yaml:snakeyaml:1.30'
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
 }
