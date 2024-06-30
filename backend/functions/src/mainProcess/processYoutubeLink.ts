@@ -4,7 +4,7 @@ import {
   getBase64ImageFromUrl,
   getYouTubeThumbnailUrls,
 } from '../utils/youtubeValidation';
-import { addClarityScoreDefinition, getChatResponse } from '../utils/general';
+import { getChatResponse, processResponse } from '../utils/general';
 import {
   extractYouTubeID,
   fetchTranscript,
@@ -99,7 +99,7 @@ async function processYouTubeLink(
     let response = await getChatResponse(messageParts, chatSession);
 
     if (response) {
-      response = addClarityScoreDefinition(response, 'youtube');
+      response = processResponse(response, 'youtube', url);
       logger.info(`Received response: ${JSON.stringify(response)}`);
       res.json({ response });
     } else {

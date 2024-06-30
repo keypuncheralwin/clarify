@@ -27,7 +27,9 @@ class MainActivity : FlutterActivity() {
                                 "clarityScore" to response.clarityScore,
                                 "answer" to response.answer,
                                 "explanation" to response.explanation,
-                                "summary" to response.summary
+                                "summary" to response.summary,
+                                "url" to response.url,
+                                "isVideo" to response.isVideo,
                             ))
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error analyzing link", e)

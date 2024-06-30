@@ -4,5 +4,7 @@ export type ClickbaitResponse = {
   explanation: string;
   summary: string;
   clarityScore: number;
-  answer?: string | null;
+  url: string;
+  isVideo: boolean;
+  answer: string | null;
 };

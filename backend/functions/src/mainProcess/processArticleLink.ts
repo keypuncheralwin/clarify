@@ -7,7 +7,7 @@ import {
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import fetchArticle from '../utils/fetchArticle';
-import { addClarityScoreDefinition, getChatResponse } from '../utils/general';
+import { getChatResponse, processResponse } from '../utils/general';
 
 /**
  * Process the article link and handle the entire flow.
@@ -53,7 +53,7 @@ async function processArticleLink(
     let response = await getChatResponse(prompt, chatSession);
 
     if (response) {
-      response = addClarityScoreDefinition(response, 'article');
+      response = processResponse(response, 'article', validUrl);
       logger.info(`Received response: ${JSON.stringify(response)}`);
       res.json({ response });
     } else {

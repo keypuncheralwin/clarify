@@ -48,16 +48,22 @@ export const getChatResponse = async (
   }
 };
 
-export const addClarityScoreDefinition = (
+export const processResponse = (
   response: ClickbaitResponse,
-  type: 'youtube' | 'article'
+  type: 'youtube' | 'article',
+  url: string
 ): ClickbaitResponse => {
   const clarityScoreDefinition =
     type === 'youtube'
       ? clarityScoreDefinitionYoutube
       : clarityScoreDefinitionArticle;
+
+  const isVideo = type === 'youtube';
+
   return {
     ...response,
     explanation: clarityScoreDefinition + response.explanation,
+    url: url,
+    isVideo: isVideo,
   };
 };

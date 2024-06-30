@@ -43,7 +43,9 @@ class ApiService(private val context: Context) {
             explanation = jsonResponse.getString("explanation"),
             summary = jsonResponse.getString("summary"),
             clarityScore = jsonResponse.getInt("clarityScore"), 
-            answer = jsonResponse.optString("answer")
+            answer = jsonResponse.optString("answer"),
+            url = jsonResponse.getString("url"),
+            isVideo = jsonResponse.getBoolean("isVideo")
         )
     }  
     
@@ -63,6 +65,8 @@ data class ClickbaitResponse(
     val explanation: String,
     val summary: String,
     val clarityScore: Int,
+    val url: String,
+    val isVideo: Boolean,
     val answer: String? = null
 )
 
