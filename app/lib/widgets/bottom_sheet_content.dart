@@ -4,8 +4,9 @@ import 'package:shimmer/shimmer.dart';
 class BottomSheetContent extends StatefulWidget {
   final bool isLoading;
   final Map<String, dynamic>? result;
+  final String? errorMessage;
 
-  const BottomSheetContent({super.key, required this.isLoading, required this.result});
+  const BottomSheetContent({super.key, required this.isLoading, required this.result, this.errorMessage});
 
   @override
   BottomSheetContentState createState() => BottomSheetContentState();
@@ -14,6 +15,7 @@ class BottomSheetContent extends StatefulWidget {
 class BottomSheetContentState extends State<BottomSheetContent> {
   late bool _isLoading;
   Map<String, dynamic>? _result;
+  String? _errorMessage;
   OverlayEntry? _tooltipOverlay;
 
   @override
@@ -21,12 +23,14 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     super.initState();
     _isLoading = widget.isLoading;
     _result = widget.result;
+    _errorMessage = widget.errorMessage;
   }
 
-  void updateContent(bool isLoading, Map<String, dynamic>? result) {
+  void updateContent(bool isLoading, Map<String, dynamic>? result, String? errorMessage) {
     setState(() {
       _isLoading = isLoading;
       _result = result;
+      _errorMessage = errorMessage;
     });
   }
 
@@ -149,12 +153,17 @@ class BottomSheetContentState extends State<BottomSheetContent> {
             ),
             _isLoading
                 ? _buildLoadingContent(isDarkMode)
-                : _result != null
-                    ? _buildResultContent(_result!, isDarkMode)
-                    : Text(
-                        'No data available',
+                : _errorMessage != null
+                    ? Text(
+                        _errorMessage!,
                         style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-                      ),
+                      )
+                    : _result != null
+                        ? _buildResultContent(_result!, isDarkMode)
+                        : Text(
+                            'No data available',
+                            style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                          ),
           ],
         ),
       ),

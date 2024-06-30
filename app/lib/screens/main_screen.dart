@@ -6,6 +6,7 @@ import 'package:clarify/screens/account_screen.dart';
 import 'package:clarify/widgets/custom_bottom_navigation_bar.dart';
 import 'package:clarify/widgets/bottom_sheet_content.dart';
 import 'package:clarify/api/analyse_link.dart';
+import 'package:clarify/utils/url_validator.dart';  // Import the URL validator
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   Map<String, dynamic>? _result;
   bool _isLoading = false;
+  String? _errorMessage;
   final GlobalKey<BottomSheetContentState> _bottomSheetKey = GlobalKey<BottomSheetContentState>();
 
   final List<Widget> _children = [
@@ -38,24 +40,26 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _isLoading = true;
       _result = null; // Clear previous result
+      _errorMessage = null; // Clear previous error message
     });
 
     ClipboardData? clipboardData = await Clipboard.getData('text/plain');
     String? url = clipboardData?.text;
 
-    if (url != null && url.isNotEmpty) {
+    if (url != null && url.isNotEmpty && isValidUrl(url)) {
       _showBottomSheet();
       final result = await ApiService.analyzeLink(url);
       setState(() {
         _result = result;
         _isLoading = false;
-        _bottomSheetKey.currentState?.updateContent(_isLoading, _result);
+        _bottomSheetKey.currentState?.updateContent(_isLoading, _result, _errorMessage);
       });
     } else {
-      print("No URL found in clipboard.");
       setState(() {
+        _errorMessage = "No valid URL found in your clipboard. Make sure you have copied a valid link first before tapping the link button.";
         _isLoading = false;
       });
+      _showBottomSheet();
     }
   }
 
@@ -68,6 +72,7 @@ class _MainScreenState extends State<MainScreen> {
           key: _bottomSheetKey,
           isLoading: _isLoading,
           result: _result,
+          errorMessage: _errorMessage,
         );
       },
     );
