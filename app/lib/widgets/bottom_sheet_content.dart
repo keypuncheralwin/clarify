@@ -257,14 +257,14 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           style: TextStyle(
             fontSize: 16,
             fontStyle: FontStyle.italic,
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: isDarkMode ? Colors.white70 : Colors.black87,
           ),
         ),
         const SizedBox(height: 10),
         Text(
           summary,
           style: TextStyle(
-            color: isDarkMode ? Colors.white70 : Colors.black87, // Darker color for light mode
+            color: isDarkMode ? Colors.white : Colors.black, 
           ),
         ),
       ],
