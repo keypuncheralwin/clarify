@@ -167,8 +167,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Shimmer.fromColors(
-          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[350]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[50]!,
           child: Container(
             width: double.infinity,
             height: 20,
@@ -177,8 +177,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         ),
         const SizedBox(height: 10),
         Shimmer.fromColors(
-          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[350]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[50]!,
           child: Container(
             width: double.infinity,
             height: 20,
@@ -187,8 +187,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         ),
         const SizedBox(height: 10),
         Shimmer.fromColors(
-          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[100]!,
+          baseColor: isDarkMode ? Colors.grey[700]! : Colors.grey[350]!,
+          highlightColor: isDarkMode ? Colors.grey[500]! : Colors.grey[50]!,
           child: Container(
             width: double.infinity,
             height: 100,
@@ -254,7 +254,9 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         const SizedBox(height: 10),
         Text(
           summary,
-          style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
+          style: TextStyle(
+            color: isDarkMode ? Colors.white70 : Colors.black87, // Darker color for light mode
+          ),
         ),
       ],
     );
