@@ -56,12 +56,7 @@
         android:layout_height="wrap_content"
         app:shimmer_auto_start="true"
         app:shimmer_duration="1000"
-        android:layout_marginTop="16dp">
-        
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="24dp"
-            android:background="@android:color/darker_gray" />
+        android:layout_marginTop="0dp">
     </com.facebook.shimmer.ShimmerFrameLayout>
 
     <com.facebook.shimmer.ShimmerFrameLayout
@@ -79,14 +74,20 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
+                android:layout_height="20dp"
+                android:background="@android:color/darker_gray" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginTop="8dp"
                 android:background="@android:color/darker_gray" />
             
             <View
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginTop="8dp" />
+                android:layout_height="100dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/darker_gray" />
         </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>
 
@@ -110,5 +111,4 @@
         android:textColor="@android:color/white"
         android:textSize="14sp"
         android:layout_marginTop="8dp"/>
-
 </LinearLayout>
