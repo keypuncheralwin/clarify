@@ -125,7 +125,13 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       },
       child: Container(
         padding: const EdgeInsets.all(16.0),
-        color: isDarkMode ? Colors.black : Colors.white,
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF2B2B2B) : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16.0),
+            topRight: Radius.circular(16.0),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@drawable/rounded_bottom_sheet_light">
+    android:background="@drawable/rounded_bottom_sheet_dark">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,7 +26,7 @@
             android:visibility="gone"
             android:layout_below="@id/closeIndicator"
             android:text="Title"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textStyle="bold"
             android:textSize="18sp"
             android:layout_marginTop="8dp"
@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:text="Subtitle"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textStyle="italic"
         android:textSize="16sp"
         android:layout_marginBottom="8dp"/>
@@ -107,7 +107,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:text="Summary"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         android:textSize="14sp"
         android:layout_marginTop="8dp"/>
 

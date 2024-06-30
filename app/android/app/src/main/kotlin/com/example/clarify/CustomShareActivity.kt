@@ -10,11 +10,10 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,18 +38,9 @@ class CustomShareActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("CustomShareActivity", "onCreate called")
-        logSharedPreferences()
         setAppTheme()
         setupBottomSheetDialog()
         handleIntent(intent)
-    }
-
-    private fun logSharedPreferences() {
-        val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val allEntries = sharedPrefs.all
-        for ((key, value) in allEntries) {
-            Log.d("CustomShareActivity", "SharedPreferences key: $key, value: $value")
-        }
     }
 
     private fun setAppTheme() {
@@ -73,8 +63,14 @@ class CustomShareActivity : Activity() {
         val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", false)
         Log.d("CustomShareActivity", "setupBottomSheetDialog isDarkMode: $isDarkMode")
-        
-        val bottomSheetView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_layout, null)
+
+        val layoutRes = if (isDarkMode) {
+            R.layout.bottom_sheet_layout_night
+        } else {
+            R.layout.bottom_sheet_layout
+        }
+
+        val bottomSheetView = LayoutInflater.from(this).inflate(layoutRes, null)
         val themeResId = if (isDarkMode) R.style.DarkBottomSheetDialog else R.style.LightBottomSheetDialog
         bottomSheetDialog = BottomSheetDialog(this, themeResId)
         bottomSheetDialog.setContentView(bottomSheetView)
