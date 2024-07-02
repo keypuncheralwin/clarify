@@ -45,7 +45,7 @@ class CustomShareActivity : Activity() {
 
     private fun setAppTheme() {
         val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", false)
+        val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", true)
         Log.d("CustomShareActivity", "setAppTheme isDarkMode: $isDarkMode")
         
         if (isDarkMode) {

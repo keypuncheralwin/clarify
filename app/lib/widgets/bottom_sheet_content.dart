@@ -17,6 +17,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
   Map<String, dynamic>? _result;
   String? _errorMessage;
   OverlayEntry? _tooltipOverlay;
+  final GlobalKey _buttonKey = GlobalKey();
 
   @override
   void initState() {
@@ -46,8 +47,12 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     }
   }
 
-  void _showTooltip(BuildContext context, String explanation, Offset position) {
+  void _showTooltip(BuildContext context, String explanation) {
     _removeTooltip(); // Ensure any existing tooltip is removed
+
+    final RenderBox renderBox = _buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+    final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
 
     OverlayState? overlayState = Overlay.of(context);
 
@@ -61,7 +66,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           children: [
             Positioned(
               left: position.dx,
-              top: position.dy + 40,
+              top: position.dy + renderBox.size.height + 10,
               child: Material(
                 color: Colors.transparent,
                 child: Container(
@@ -107,7 +112,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       ),
     );
 
-    overlayState.insert(_tooltipOverlay!);
+    overlayState!.insert(_tooltipOverlay!);
   }
 
   void _removeTooltip() {
@@ -127,44 +132,56 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           Navigator.of(context).pop();
         }
       },
+      behavior: HitTestBehavior.opaque, // Ensure tap outside bottom sheet is detected
       child: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: isDarkMode ? const Color(0xFF2B2B2B) : Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(16.0),
-            topRight: Radius.circular(16.0),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-                  borderRadius: BorderRadius.circular(10),
-                ),
+        color: Colors.transparent,
+        child: GestureDetector(
+          onTap: () {}, // Override onTap to prevent closing when tapping the sheet
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF2B2B2B) : Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
               ),
             ),
-            _isLoading
-                ? _buildLoadingContent(isDarkMode)
-                : _errorMessage != null
-                    ? Text(
-                        _errorMessage!,
-                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-                      )
-                    : _result != null
-                        ? _buildResultContent(_result!, isDarkMode)
-                        : Text(
-                            'No data available',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop(); // Close bottom sheet on dash tap
+                  },
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                _isLoading
+                    ? _buildLoadingContent(isDarkMode)
+                    : _errorMessage != null
+                        ? SelectableText(
+                            _errorMessage!,
                             style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-                          ),
-          ],
+                          )
+                        : _result != null
+                            ? _buildResultContent(_result!, isDarkMode)
+                            : SelectableText(
+                                'No data available',
+                                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                              ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -220,7 +237,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        SelectableText(
           title,
           style: TextStyle(
             fontSize: 20,
@@ -229,30 +246,27 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           ),
         ),
         const SizedBox(height: 10),
-        Builder(
-          builder: (context) {
-            return GestureDetector(
-              onTap: () {
-                final RenderBox renderBox = context.findRenderObject() as RenderBox;
-                final Offset position = renderBox.localToGlobal(Offset.zero);
-                _showTooltip(context, explanation, position);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getClarityScoreColor(clarityScoreValue),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Clarity Score: $clarityScore',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            );
+        ElevatedButton(
+          key: _buttonKey,
+          onPressed: () {
+            _showTooltip(context, explanation);
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _getClarityScoreColor(clarityScoreValue),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: const Size(0, 0), // Removes default minimum size constraints
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Shrinks the tap target size
+          ),
+          child: Text(
+            'Clarity Score: $clarityScore',
+            style: const TextStyle(color: Colors.white, fontSize: 12), // Smaller font size
+          ),
         ),
         const SizedBox(height: 10),
-        Text(
+        SelectableText(
           answer,
           style: TextStyle(
             fontSize: 16,
@@ -261,10 +275,10 @@ class BottomSheetContentState extends State<BottomSheetContent> {
           ),
         ),
         const SizedBox(height: 10),
-        Text(
+        SelectableText(
           summary,
           style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.black, 
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
       ],
