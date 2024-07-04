@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/providers/theme_provider.dart';
+import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -19,7 +20,7 @@ class AccountScreen extends ConsumerWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Implement sign-in or create account functionality
+                  _showEmailBottomSheet(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
@@ -159,6 +160,19 @@ class AccountScreen extends ConsumerWidget {
           : null,
       trailing: trailing,
       onTap: onTap,
+    );
+  }
+
+  void _showEmailBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return const SignInBottomSheet();
+      },
     );
   }
 }

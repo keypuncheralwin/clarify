@@ -4,7 +4,7 @@ import 'package:clarify/screens/home_screen.dart';
 import 'package:clarify/screens/favorites_screen.dart';
 import 'package:clarify/screens/account_screen.dart';
 import 'package:clarify/widgets/custom_bottom_navigation_bar.dart';
-import 'package:clarify/widgets/bottom_sheet_content.dart';
+import 'package:clarify/widgets/analysed_link_bottom_sheet.dart'; // Updated import
 import 'package:clarify/api/analyse_link.dart';
 import 'package:clarify/utils/url_validator.dart';  // Import the URL validator
 
@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   Map<String, dynamic>? _result;
   bool _isLoading = false;
   String? _errorMessage;
-  final GlobalKey<BottomSheetContentState> _bottomSheetKey = GlobalKey<BottomSheetContentState>();
+  final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey = GlobalKey<AnalysedLinkBottomSheetState>(); // Updated state key
 
   final List<Widget> _children = [
     const HomeScreen(),
@@ -68,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return BottomSheetContent(
+        return AnalysedLinkBottomSheet(
           key: _bottomSheetKey,
           isLoading: _isLoading,
           result: _result,
@@ -111,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
                 angle: -0.785398, // -45 degrees in radians
                 child: const Icon(
                   Icons.link,
-                  color:Colors.white,
+                  color: Colors.white,
                 ),
               ),
             )
