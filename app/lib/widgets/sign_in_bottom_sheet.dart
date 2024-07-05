@@ -16,6 +16,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
   bool _isCodeSent = false;
+  bool _isSendingCode = false;
   String? _errorMessage;
   String? _email;
 
@@ -50,16 +51,24 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
       return;
     }
 
+    setState(() {
+      _isSendingCode = true;
+      _errorMessage = null;
+    });
+
     try {
       await AuthService.sendVerificationCode(email);
       setState(() {
         _isCodeSent = true;
         _email = email;
-        _errorMessage = null;
       });
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isSendingCode = false;
       });
     }
   }
@@ -138,22 +147,26 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         if (_errorMessage != null) ...[
           Text(
             _errorMessage!,
-            style: TextStyle(color: Colors.red),
+            style: const TextStyle(color: Colors.red),
           ),
           const SizedBox(height: 16),
         ],
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _sendVerificationCode,
+            onPressed: _isSendingCode ? null : _sendVerificationCode,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
-            child: const Text(
-              'Submit',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
+            child: _isSendingCode
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Text(
+                    'Submit',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
           ),
         ),
       ],
@@ -216,7 +229,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         if (_errorMessage != null) ...[
           Text(
             _errorMessage!,
-            style: TextStyle(color: Colors.red),
+            style: const TextStyle(color: Colors.red),
           ),
           const SizedBox(height: 16),
         ],
