@@ -16,6 +16,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final TextEditingController _nameController = TextEditingController();
   final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
+  final FocusNode _nameFocusNode = FocusNode();
   bool _isCodeSent = false;
   bool _isNameRequired = false;
   bool _isSendingCode = false;
@@ -42,6 +43,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
     for (var focusNode in _codeFocusNodes) {
       focusNode.dispose();
     }
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
@@ -65,6 +67,9 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
       setState(() {
         _isCodeSent = true;
         _email = email;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _codeFocusNodes[0].requestFocus();
+        });
       });
     } catch (e) {
       setState(() {
@@ -98,6 +103,9 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         setState(() {
           _isNameRequired = true;
           _isVerifyingCode = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _nameFocusNode.requestFocus();
+          });
         });
       } else {
         final token = result['token'];
@@ -155,7 +163,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      heightFactor: 0.7,
+      heightFactor: 0.78,
       child: Padding(
         padding: MediaQuery.of(context).viewInsets,
         child: SingleChildScrollView(
@@ -335,6 +343,9 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
                   _isNameRequired = false;
                   _isCodeSent = true;
                   _errorMessage = null;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _codeFocusNodes[0].requestFocus();
+                  });
                 });
               },
             ),
@@ -350,6 +361,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         const SizedBox(height: 16),
         TextField(
           controller: _nameController,
+          focusNode: _nameFocusNode,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             hintText: 'Name',
