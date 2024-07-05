@@ -37,7 +37,7 @@ router.post(
 router.post(
   '/verify-code',
   async (req: Request, res: Response): Promise<void> => {
-    const { email, code } = req.body;
+    const { email, code, name } = req.body;
 
     if (!email || !code) {
       res.status(400).send('Email and code are required');
@@ -72,7 +72,13 @@ router.post(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (error.code === 'auth/user-not-found') {
-          userRecord = await admin.auth().createUser({ email });
+          if (!name) {
+            res.status(200).json({ nameRequired: true });
+            return;
+          }
+          userRecord = await admin
+            .auth()
+            .createUser({ email, displayName: name });
         } else {
           throw error;
         }

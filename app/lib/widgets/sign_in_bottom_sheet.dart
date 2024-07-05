@@ -13,9 +13,11 @@ class SignInBottomSheet extends ConsumerStatefulWidget {
 class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final FocusNode _emailFocusNode = FocusNode();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
   bool _isCodeSent = false;
+  bool _isNameRequired = false;
   bool _isSendingCode = false;
   bool _isVerifyingCode = false;
   String? _errorMessage;
@@ -33,6 +35,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   void dispose() {
     _emailFocusNode.dispose();
     _emailController.dispose();
+    _nameController.dispose();
     for (var controller in _codeControllers) {
       controller.dispose();
     }
@@ -90,7 +93,49 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
     });
 
     try {
-      final token = await AuthService.verifyCode(_email!, code);
+      final result = await AuthService.verifyCode(_email!, code);
+      if (result['nameRequired'] == true) {
+        setState(() {
+          _isNameRequired = true;
+          _isVerifyingCode = false;
+        });
+      } else {
+        final token = result['token'];
+        await ref.read(authStateProvider.notifier).signInWithToken(token);
+        setState(() {
+          _isVerifyingCode = false;
+        });
+        Navigator.of(context).pop(); // Close the bottom sheet after successful login
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully signed in')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isVerifyingCode = false;
+      });
+    }
+  }
+
+  Future<void> _createUser() async {
+    final name = _nameController.text;
+    final code = _codeControllers.map((controller) => controller.text).join();
+
+    if (name.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your name';
+      });
+      return;
+    }
+
+    setState(() {
+      _isVerifyingCode = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token = await AuthService.createUser(_email!, code, name);
       await ref.read(authStateProvider.notifier).signInWithToken(token);
       setState(() {
         _isVerifyingCode = false;
@@ -110,7 +155,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
-      heightFactor: 0.7, // Adjust this value as needed to ensure enough space
+      heightFactor: 0.7,
       child: Padding(
         padding: MediaQuery.of(context).viewInsets,
         child: SingleChildScrollView(
@@ -134,7 +179,11 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: _isCodeSent ? _buildCodeInputView() : _buildEmailInputView(),
+                child: _isCodeSent
+                    ? _isNameRequired
+                        ? _buildNameInputView()
+                        : _buildCodeInputView()
+                    : _buildEmailInputView(),
               ),
             ],
           ),
@@ -219,7 +268,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(4, (index) {
-            return Container(
+            return SizedBox(
               width: 50,
               child: TextField(
                 controller: _codeControllers[index],
@@ -265,6 +314,69 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
                   )
                 : const Text(
                     'Verify',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNameInputView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  _isNameRequired = false;
+                  _isCodeSent = true;
+                  _errorMessage = null;
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Welcome to Clarify!',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        const Text('What should we call you?'),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _nameController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Name',
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_errorMessage != null) ...[
+          Text(
+            _errorMessage!,
+            style: const TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+        ],
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _isVerifyingCode ? null : _createUser,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: _isVerifyingCode
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Text(
+                    'Complete Sign Up',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
           ),

@@ -20,7 +20,7 @@ class AuthService {
     }
   }
 
-  static Future<String> verifyCode(String email, String code) async {
+  static Future<Map<String, dynamic>> verifyCode(String email, String code) async {
     final response = await http.post(
       Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{
@@ -34,6 +34,27 @@ class AuthService {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to verify code');
+    }
+
+    final Map<String, dynamic> data = jsonDecode(response.body);
+    return data;
+  }
+
+  static Future<String> createUser(String email, String code, String name) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verify-code'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'code': code,
+        'name': name,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create user');
     }
 
     final Map<String, dynamic> data = jsonDecode(response.body);
