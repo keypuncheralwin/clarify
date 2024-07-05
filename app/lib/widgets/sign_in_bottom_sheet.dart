@@ -14,6 +14,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final FocusNode _emailFocusNode = FocusNode();
   final TextEditingController _emailController = TextEditingController();
   final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
   bool _isCodeSent = false;
   String? _errorMessage;
   String? _email;
@@ -32,6 +33,9 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
     _emailController.dispose();
     for (var controller in _codeControllers) {
       controller.dispose();
+    }
+    for (var focusNode in _codeFocusNodes) {
+      focusNode.dispose();
     }
     super.dispose();
   }
@@ -188,6 +192,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
               width: 50,
               child: TextField(
                 controller: _codeControllers[index],
+                focusNode: _codeFocusNodes[index],
                 keyboardType: TextInputType.number,
                 maxLength: 1,
                 textAlign: TextAlign.center,
@@ -195,6 +200,14 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
                   border: OutlineInputBorder(),
                   counterText: '',
                 ),
+                onChanged: (value) {
+                  if (value.isNotEmpty && index < 3) {
+                    _codeFocusNodes[index + 1].requestFocus();
+                  }
+                  if (value.isEmpty && index > 0) {
+                    _codeFocusNodes[index - 1].requestFocus();
+                  }
+                },
               ),
             );
           }),
