@@ -334,27 +334,10 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                setState(() {
-                  _isNameRequired = false;
-                  _isCodeSent = true;
-                  _errorMessage = null;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _codeFocusNodes[0].requestFocus();
-                  });
-                });
-              },
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Welcome to Clarify!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        const SizedBox(width: 8),
+        const Text(
+          'Welcome to Clarify!',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         const Text('What should we call you?'),
