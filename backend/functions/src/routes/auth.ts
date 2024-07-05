@@ -1,13 +1,12 @@
 import { Router, Request, Response } from 'express';
 import admin from 'firebase-admin';
-import crypto from 'crypto';
 import { firestore } from 'firebase-admin';
-import { sendMagicLink } from '../utils/emailService'; // Adjust your email service to handle sending magic links
+import { sendVerificationCode } from '../utils/emailService';
 
 const router = Router();
 
 router.post(
-  '/send-magic-link',
+  '/send-verification-code',
   async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
 
@@ -17,54 +16,53 @@ router.post(
     }
 
     try {
-      const token = crypto.randomBytes(20).toString('hex');
+      const code = Math.floor(1000 + Math.random() * 9000).toString();
       const db = firestore();
-      const docRef = db.collection('magicLinks').doc(email);
+      const docRef = db.collection('verificationCodes').doc(email);
       await docRef.set({
-        token,
+        code,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      const magicLink = `clarify://auth?token=${token}&email=${email}`;
-      await sendMagicLink(email, magicLink); // Adjust your email service to send the magic link
+      await sendVerificationCode(email, code);
 
-      res.status(200).send('Magic link sent!');
+      res.status(200).send('Verification code sent!');
     } catch (error) {
-      console.error('Error sending magic link:', error);
-      res.status(500).send('Failed to send magic link');
+      console.error('Error sending verification code:', error);
+      res.status(500).send('Failed to send verification code');
     }
   }
 );
 
 router.post(
-  '/verify-magic-link',
+  '/verify-code',
   async (req: Request, res: Response): Promise<void> => {
-    const { email, token } = req.body;
+    const { email, code } = req.body;
 
-    if (!email || !token) {
-      res.status(400).send('Email and token are required');
+    if (!email || !code) {
+      res.status(400).send('Email and code are required');
       return;
     }
 
     try {
       const db = firestore();
-      const docRef = db.collection('magicLinks').doc(email);
+      const docRef = db.collection('verificationCodes').doc(email);
       const doc = await docRef.get();
 
       if (!doc.exists) {
-        res.status(400).send('Invalid token or email');
+        res.status(400).send('Invalid code or email');
         return;
       }
 
       const data = doc.data();
-      const { token: storedToken, createdAt } = data || {};
+      const { code: storedCode, createdAt } = data || {};
 
       const isValid =
-        storedToken === token &&
+        storedCode === code &&
         createdAt.toMillis() + 15 * 60 * 1000 > Date.now();
 
       if (!isValid) {
-        res.status(400).send('Invalid or expired token');
+        res.status(400).send('Invalid or expired code');
         return;
       }
 
@@ -85,8 +83,8 @@ router.post(
         .createCustomToken(userRecord.uid);
       res.status(200).json({ token: firebaseToken });
     } catch (error) {
-      console.error('Error verifying token:', error);
-      res.status(500).send('Failed to verify token');
+      console.error('Error verifying code:', error);
+      res.status(500).send('Failed to verify code');
     }
   }
 );

@@ -1,5 +1,7 @@
+import dotenv from 'dotenv';
 import { Resend } from 'resend';
 
+dotenv.config();
 const resendKey = process.env.RESEND_KEY || '';
 
 if (!resendKey) {
@@ -8,12 +10,12 @@ if (!resendKey) {
 
 const resend = new Resend(resendKey);
 
-export const sendMagicLink = async (email: string, link: string) => {
+export const sendVerificationCode = async (email: string, code: string) => {
   const mailOptions = {
     from: 'auth@clarifyapp.io',
     to: email,
     subject: 'Your Verification Code',
-    text: `Your magic link is: ${link}`,
+    text: `Your verification code is: ${code}`,
   };
 
   try {

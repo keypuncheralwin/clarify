@@ -4,9 +4,9 @@ import 'package:http/http.dart' as http;
 class AuthService {
   static const String baseUrl = 'https://ce2a-122-150-251-96.ngrok-free.app/clarify-c7c86/us-central1/api/auth'; // Replace with your backend URL
 
-  static Future<void> sendMagicLink(String email) async {
+  static Future<void> sendVerificationCode(String email) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/send-magic-link'),
+      Uri.parse('$baseUrl/send-verification-code'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -16,24 +16,24 @@ class AuthService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to send magic link');
+      throw Exception('Failed to send verification code');
     }
   }
 
-  static Future<String> verifyMagicLink(String email, String token) async {
+  static Future<String> verifyCode(String email, String code) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/verify-magic-link'),
+      Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
         'email': email,
-        'token': token,
+        'code': code,
       }),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to verify magic link');
+      throw Exception('Failed to verify code');
     }
 
     final Map<String, dynamic> data = jsonDecode(response.body);

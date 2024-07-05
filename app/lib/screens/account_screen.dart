@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:clarify/providers/theme_provider.dart';
+import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
 
-class AccountScreen extends ConsumerStatefulWidget {
+class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   @override
-  _AccountScreenState createState() => _AccountScreenState();
-}
-
-class _AccountScreenState extends ConsumerState<AccountScreen> {
-  BuildContext? _bottomSheetContext;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(themeProvider).brightness == Brightness.dark;
-    final user = FirebaseAuth.instance.currentUser;
+    final user = ref.watch(authStateProvider);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -26,22 +19,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            if (user == null)
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showEmailBottomSheet(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  ),
-                  child: const Text(
-                    'Sign in or create an account',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ),
+            Center(
+              child: user == null
+                  ? ElevatedButton(
+                      onPressed: () {
+                        _showEmailBottomSheet(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      ),
+                      child: const Text(
+                        'Sign in or create an account',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
             const SizedBox(height: 40),
             Text(
               'General Settings',
@@ -148,20 +142,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 context,
                 icon: Icons.logout,
                 title: 'Logout',
-                onTap: () async {
-                  await FirebaseAuth.instance.signOut();
-                  setState(() {
-                    _showBottomSheet('Logged out successfully');
-                  });
-                  Future.delayed(const Duration(seconds: 1), () {
-                    if (_bottomSheetContext != null) {
-                      Navigator.pop(_bottomSheetContext!);
-                      _bottomSheetContext = null;
-                    }
-                  });
+                onTap: () {
+                  ref.read(authStateProvider.notifier).signOut();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out successfully')),
+                  );
                 },
                 isDarkMode: isDarkMode,
-                titleColor: const Color(0xFFfe2712), // Set the logout text color to red
+                textColor: Colors.red,
               ),
           ],
         ),
@@ -176,12 +164,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       Widget? trailing,
       void Function()? onTap,
       required bool isDarkMode,
-      Color titleColor = Colors.black}) {
+      Color textColor = Colors.black}) {
     return ListTile(
       leading: Icon(icon, color: isDarkMode ? Colors.white : Colors.black),
       title: Text(
         title,
-        style: TextStyle(color: title == 'Logout' ? Colors.red : (isDarkMode ? Colors.white : Colors.black)),
+        style: TextStyle(color: isDarkMode ? Colors.white : textColor),
       ),
       subtitle: subtitle != null
           ? Text(
@@ -205,31 +193,5 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         return const SignInBottomSheet();
       },
     );
-  }
-
-  void _showBottomSheet(String message) {
-    showModalBottomSheet(
-      context: context,
-      isDismissible: false,
-      builder: (BuildContext context) {
-        _bottomSheetContext = context;
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          height: 100,
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.check_circle, color: Colors.green, size: 24.0),
-                const SizedBox(width: 16),
-                Text(message),
-              ],
-            ),
-          ),
-        );
-      },
-    ).whenComplete(() {
-      _bottomSheetContext = null;
-    });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/auth_service.dart';
+import 'package:clarify/providers/auth_provider.dart';
 
 class SignInBottomSheet extends ConsumerStatefulWidget {
   const SignInBottomSheet({super.key});
@@ -12,7 +13,10 @@ class SignInBottomSheet extends ConsumerStatefulWidget {
 class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final FocusNode _emailFocusNode = FocusNode();
   final TextEditingController _emailController = TextEditingController();
+  final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
+  bool _isCodeSent = false;
   String? _errorMessage;
+  String? _email;
 
   @override
   void initState() {
@@ -26,10 +30,13 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   void dispose() {
     _emailFocusNode.dispose();
     _emailController.dispose();
+    for (var controller in _codeControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
-  Future<void> _sendMagicLink() async {
+  Future<void> _sendVerificationCode() async {
     final email = _emailController.text;
 
     if (email.isEmpty) {
@@ -40,10 +47,33 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
     }
 
     try {
-      await AuthService.sendMagicLink(email);
+      await AuthService.sendVerificationCode(email);
       setState(() {
-        _errorMessage = 'Magic link sent! Check your email.';
+        _isCodeSent = true;
+        _email = email;
+        _errorMessage = null;
       });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  Future<void> _verifyCode() async {
+    final code = _codeControllers.map((controller) => controller.text).join();
+
+    if (code.isEmpty || code.length != 4) {
+      setState(() {
+        _errorMessage = 'Please enter the 4-digit verification code';
+      });
+      return;
+    }
+
+    try {
+      final token = await AuthService.verifyCode(_email!, code);
+      await ref.read(authStateProvider.notifier).signInWithToken(token);
+      Navigator.of(context).pop(); // Close the bottom sheet after successful login
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -75,50 +105,123 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Enter your email',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _emailController,
-                  focusNode: _emailFocusNode,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Email',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (_errorMessage != null) ...[
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _sendMagicLink,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    ),
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: _isCodeSent ? _buildCodeInputView() : _buildEmailInputView(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEmailInputView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Enter your email',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _emailController,
+          focusNode: _emailFocusNode,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Email',
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (_errorMessage != null) ...[
+          Text(
+            _errorMessage!,
+            style: TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+        ],
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _sendVerificationCode,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: const Text(
+              'Submit',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCodeInputView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                setState(() {
+                  _isCodeSent = false;
+                  _errorMessage = null;
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Enter the 4-digit code',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text('Check your email for the verification code sent to $_email'),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(4, (index) {
+            return Container(
+              width: 50,
+              child: TextField(
+                controller: _codeControllers[index],
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  counterText: '',
+                ),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 16),
+        if (_errorMessage != null) ...[
+          Text(
+            _errorMessage!,
+            style: TextStyle(color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+        ],
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _verifyCode,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: const Text(
+              'Verify',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
