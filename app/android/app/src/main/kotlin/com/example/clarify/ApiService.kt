@@ -1,4 +1,4 @@
-package com.example.clarify
+package com.clarify.app
 
 import android.content.Context
 import android.provider.Settings

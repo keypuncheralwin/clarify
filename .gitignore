@@ -122,3 +122,19 @@ app/.flutter-plugins-dependencies
 /app/android/build/
 /app/android/app/build/
 /app/android/local.properties
+
+# Sensitive configuration files
+app/android/app/google-services.json
+app/ios/Runner/GoogleService-Info.plist
+
+# Environment-specific files
+app/Gemfile
+app/Gemfile.lock
+app/firebase.json
+
+# Auto-generated files
+app/lib/firebase_options.dart
+
+
+#backend firebase
+backend/functions/src/key.json

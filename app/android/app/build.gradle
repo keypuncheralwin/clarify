@@ -11,6 +11,9 @@ buildscript {
 
 plugins {
     id 'com.android.application'
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id 'kotlin-android'
     id 'dev.flutter.flutter-gradle-plugin'
 }
@@ -34,7 +37,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = 'com.example.clarify'
+    namespace = 'com.clarify.app'
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -44,8 +47,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = 'com.example.clarify'
-        minSdk = flutter.minSdkVersion
+        applicationId = 'com.clarify.app'
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName

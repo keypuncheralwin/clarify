@@ -1,4 +1,4 @@
-package com.example.clarify
+package com.clarify.app
 
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
@@ -8,7 +8,7 @@ import kotlinx.coroutines.*
 import android.util.Log
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.clarify/api"
+    private val CHANNEL = "com.clarify.app/api"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

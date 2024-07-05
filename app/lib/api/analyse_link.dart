@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class ApiService {
-  static const platform = MethodChannel('com.example.clarify/api');
+  static const platform = MethodChannel('com.clarify.app/api');
 
   static Future<Map<String, dynamic>?> analyzeLink(String url) async {
     try {
