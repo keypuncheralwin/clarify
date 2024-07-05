@@ -109,31 +109,36 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: MediaQuery.of(context).viewInsets,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              margin: const EdgeInsets.only(top: 16),
-              width: 40,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
+    return FractionallySizedBox(
+      heightFactor: 0.7, // Adjust this value as needed to ensure enough space
+      child: Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(top: 16),
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _isCodeSent ? _buildCodeInputView() : _buildEmailInputView(),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _isCodeSent ? _buildCodeInputView() : _buildEmailInputView(),
-          ),
-        ],
+        ),
       ),
     );
   }
