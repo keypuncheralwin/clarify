@@ -17,6 +17,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
   bool _isCodeSent = false;
   bool _isSendingCode = false;
+  bool _isVerifyingCode = false;
   String? _errorMessage;
   String? _email;
 
@@ -83,13 +84,25 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
       return;
     }
 
+    setState(() {
+      _isVerifyingCode = true;
+      _errorMessage = null;
+    });
+
     try {
       final token = await AuthService.verifyCode(_email!, code);
       await ref.read(authStateProvider.notifier).signInWithToken(token);
+      setState(() {
+        _isVerifyingCode = false;
+      });
       Navigator.of(context).pop(); // Close the bottom sheet after successful login
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Successfully signed in')),
+      );
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
+        _isVerifyingCode = false;
       });
     }
   }
@@ -236,15 +249,19 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _verifyCode,
+            onPressed: _isVerifyingCode ? null : _verifyCode,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
-            child: const Text(
-              'Verify',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
+            child: _isVerifyingCode
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : const Text(
+                    'Verify',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
           ),
         ),
       ],
