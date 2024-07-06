@@ -20,7 +20,7 @@ class ApiService(private val context: Context) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    suspend fun analyzeLink(link: String): ClickbaitResponse = withContext(Dispatchers.IO) {
+    suspend fun analyzeLink(link: String, idToken: String?): ClickbaitResponse = withContext(Dispatchers.IO) {
         val url = readConfig()
         val deviceId = getDeviceId() ?: "NO_DEVICE_ID"
         val json = JSONObject().apply {
@@ -28,10 +28,15 @@ class ApiService(private val context: Context) {
             put("device_id", deviceId)
         }
         val requestBody = json.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
             .url(url)
             .post(requestBody)
-            .build()
+
+        idToken?.let {
+            requestBuilder.addHeader("Authorization", "Bearer $it")
+        }
+
+        val request = requestBuilder.build()
         Log.d("ApiService", "Request: $requestBody")
 
         val response = client.newCall(request).execute()

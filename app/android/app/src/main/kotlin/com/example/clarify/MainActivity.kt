@@ -6,10 +6,19 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.clarify.app/api"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private lateinit var auth: FirebaseAuth
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()  // Initialize Firebase Auth
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -20,7 +29,8 @@ class MainActivity : FlutterActivity() {
                 if (url != null) {
                     coroutineScope.launch {
                         try {
-                            val response = ApiService(applicationContext).analyzeLink(url)
+                            val idToken = getIdToken()
+                            val response = ApiService(applicationContext).analyzeLink(url, idToken)
                             result.success(mapOf(
                                 "title" to response.title,
                                 "isClickBait" to response.isClickBait,
@@ -42,6 +52,22 @@ class MainActivity : FlutterActivity() {
             } else {
                 result.notImplemented()
             }
+        }
+    }
+
+    private suspend fun getIdToken(): String? = suspendCoroutine { cont ->
+        val user = auth.currentUser
+        if (user != null) {
+            user.getIdToken(false).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val idToken = task.result?.token
+                    cont.resume(idToken)
+                } else {
+                    cont.resumeWith(Result.failure(task.exception ?: Exception("Failed to get ID token")))
+                }
+            }
+        } else {
+            cont.resume(null)  // User is not signed in
         }
     }
 

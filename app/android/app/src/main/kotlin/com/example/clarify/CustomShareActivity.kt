@@ -18,7 +18,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 class CustomShareActivity : Activity() {
 
@@ -114,7 +116,8 @@ class CustomShareActivity : Activity() {
             bottomSheetDialog.show()
             coroutineScope.launch {
                 try {
-                    val result = apiService.analyzeLink(sharedText)
+                    val idToken = getIdToken()
+                    val result = apiService.analyzeLink(sharedText, idToken)
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
@@ -123,6 +126,11 @@ class CustomShareActivity : Activity() {
                 }
             }
         }
+    }
+
+    private suspend fun getIdToken(): String? = withContext(Dispatchers.IO) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.getIdToken(false)?.await()?.token
     }
 
     private fun displayResult(result: ClickbaitResponse) {
