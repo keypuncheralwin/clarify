@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import auth from './routes/auth';
 import analyse from './routes/analyse';
 import serviceAccount from './key.json';
+import fetchUserHistory from './routes/fetchUserHistory';
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/auth', auth);
-app.use('/clarify', analyse);
+app.use(auth);
+app.use(analyse);
+app.use(fetchUserHistory);
 
 exports.api = functions.https.onRequest(app);
