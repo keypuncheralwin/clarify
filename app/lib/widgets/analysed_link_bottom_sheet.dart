@@ -23,6 +23,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   String? _errorMessage;
   OverlayEntry? _tooltipOverlay;
   final GlobalKey _buttonKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
+  bool _isAtBottom = false;
 
   @override
   void initState() {
@@ -30,6 +32,32 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     _isLoading = widget.isLoading;
     _result = widget.result;
     _errorMessage = widget.errorMessage;
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.atEdge) {
+      if (_scrollController.position.pixels == 0) {
+        setState(() {
+          _isAtBottom = false;
+        });
+      } else {
+        setState(() {
+          _isAtBottom = true;
+        });
+      }
+    } else {
+      setState(() {
+        _isAtBottom = false;
+      });
+    }
   }
 
   void updateContent(bool isLoading, Map<String, dynamic>? result, String? errorMessage) {
@@ -184,6 +212,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                                 'No data available',
                                 style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                               ),
+                const SizedBox(height: 10),
+                _buildActionButtons(), // Updated to show two buttons
               ],
             ),
           ),
@@ -237,7 +267,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     final explanation = result['explanation'] ?? 'No explanation available';
     final answer = result['answer'] ?? 'No answer available';
     final summary = result['summary'] ?? 'No summary available';
+    final combinedLength = answer.length + summary.length;
 
+    double containerHeight = MediaQuery.of(context).size.height * 0.5; // 50% of the screen height
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,22 +303,134 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
           ),
         ),
         const SizedBox(height: 10),
-        SelectableText(
-          answer,
-          style: TextStyle(
-            fontSize: 16,
-            fontStyle: FontStyle.italic,
-            color: isDarkMode ? Colors.white70 : Colors.black87,
+        combinedLength > 800
+            ? Stack(
+                children: [
+                  SizedBox(
+                    height: containerHeight,
+                    child: Scrollbar(
+                      controller: _scrollController,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SelectableText(
+                              answer,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontStyle: FontStyle.italic,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SelectableText(
+                              summary,
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (!_isAtBottom)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.transparent.withOpacity(0.1),
+                              Colors.transparent.withOpacity(0.2),
+                              Colors.transparent.withOpacity(0.3),
+                              Colors.transparent.withOpacity(0.4),
+                              Colors.transparent.withOpacity(0.5),
+                              isDarkMode ? const Color(0xFF2B2B2B) : const Color(0xFFFFFFFF),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SelectableText(
+                    answer,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SelectableText(
+                    summary,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {
+              // Implement your first button action here
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: isDarkMode ? Colors.white : Colors.deepPurple),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            child: Text(
+              'First Action',
+              style: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white : Colors.deepPurple),
+            ),
           ),
         ),
-        const SizedBox(height: 10),
-        SelectableText(
-          summary,
-          style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.black,
+        const SizedBox(width: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () {
+              // Implement your second button action here
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            child: const Text(
+              'Second Action',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
           ),
         ),
       ],
     );
   }
+
+
 }
