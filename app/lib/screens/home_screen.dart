@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildInitialLoadingSkeleton() {
     return ListView.builder(
-      itemCount: 7, // Number of skeleton items
+      itemCount: 7,
       itemBuilder: (context, index) {
         return const SkeletonListTile();
       },

@@ -9,6 +9,7 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   bool _isLoading = false;
   bool isLoadingMore = false;
   bool isInitialLoading = true; // Track initial loading state
+  bool isRefreshing = false; // Track refreshing state
   String? _nextPageToken;
   bool _hasMore = true;
 
@@ -41,10 +42,22 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   }
 
   Future<void> refreshHistory() async {
-    _nextPageToken = null;
-    _hasMore = true;
-    state = [];
-    await _fetchInitialUserHistory();
+    if (isRefreshing) return;
+
+    isRefreshing = true;
+
+    try {
+      final response = await UserHistoryService.fetchUserHistory(10);
+      final List<Map<String, dynamic>> newItems = List<Map<String, dynamic>>.from(response['userHistory']);
+
+      state = [...newItems, ...state];
+    } catch (e) {
+      // Handle error
+      print('Error refreshing user history: $e');
+    } finally {
+      isRefreshing = false;
+      state = [...state]; // Trigger state change to update the UI
+    }
   }
 
   void addNewHistory(Map<String, dynamic> newHistoryItem) {
