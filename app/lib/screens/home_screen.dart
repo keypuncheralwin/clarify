@@ -1,10 +1,10 @@
-import 'package:clarify/widgets/clarity_score_pill.dart';
+import 'package:clarify/providers/user_history_notifier.dart';
 import 'package:clarify/widgets/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:clarify/api/user_history_service.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
+import 'package:clarify/widgets/clarity_score_pill.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -15,56 +15,35 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final List<Map<String, dynamic>> _userHistory = [];
-  bool _isLoading = false;
-  String? _nextPageToken;
-  bool _hasMore = true;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _fetchUserHistory();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        _fetchUserHistory();
+        ref.read(userHistoryProvider.notifier).fetchMoreHistory();
       }
     });
-  }
-
-  Future<void> _fetchUserHistory() async {
-    if (_isLoading || !_hasMore) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final response = await UserHistoryService.fetchUserHistory(10, pageToken: _nextPageToken);
-      final List<Map<String, dynamic>> newItems = List<Map<String, dynamic>>.from(response['userHistory']);
-      setState(() {
-        _userHistory.addAll(newItems);
-        _nextPageToken = response['nextPageToken'];
-        _hasMore = _nextPageToken != null;
-      });
-    } catch (e) {
-      // Handle error
-      print('Error fetching user history: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider);
+    final userHistory = ref.watch(userHistoryProvider);
+    final userHistoryNotifier = ref.read(userHistoryProvider.notifier);
+    final isLoadingMore = userHistoryNotifier.isLoadingMore;
+    final isInitialLoading = userHistoryNotifier.isInitialLoading;
 
     return Scaffold(
       body: user == null
           ? _buildWelcomeMessage()
-          : _buildUserHistory(),
+          : isInitialLoading
+              ? _buildInitialLoadingSkeleton()
+              : RefreshIndicator(
+                  onRefresh: () => ref.read(userHistoryProvider.notifier).refreshHistory(),
+                  child: _buildUserHistory(userHistory, isLoadingMore),
+                ),
     );
   }
 
@@ -92,18 +71,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildUserHistory() {
+  Widget _buildInitialLoadingSkeleton() {
+    return ListView.builder(
+      itemCount: 7, // Number of skeleton items
+      itemBuilder: (context, index) {
+        return const SkeletonListTile();
+      },
+    );
+  }
+
+  Widget _buildUserHistory(List<Map<String, dynamic>> userHistory, bool isLoadingMore) {
     return ListView.builder(
       controller: _scrollController,
-      itemCount: _userHistory.length + (_hasMore ? 3 : 0), // Show 3 skeleton items while loading
+      itemCount: userHistory.length + (isLoadingMore ? 3 : 0), // Show skeleton items only when loading more
       itemBuilder: (context, index) {
-        if (index >= _userHistory.length) {
+        if (index >= userHistory.length) {
           return const SkeletonListTile();
         }
 
-        final item = _userHistory[index];
+        final item = userHistory[index];
         final analysedAt = (item['analysedAt'] as Timestamp).toDate();
-        
+
         return Column(
           children: [
             InkWell(
@@ -127,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 trailing: const Icon(Icons.arrow_drop_down),
               ),
             ),
-            const Divider(height: 1, thickness: 1),
+            const Divider(height: 1, thickness: 1), // Add a divider between items
           ],
         );
       },
