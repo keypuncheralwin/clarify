@@ -37,7 +37,7 @@ router.post(
 router.post(
   '/verify-code',
   async (req: Request, res: Response): Promise<void> => {
-    const { email, code, name } = req.body;
+    const { email, code, name, device_id } = req.body;
 
     if (!email || !code) {
       res.status(400).send('Email and code are required');
@@ -87,6 +87,16 @@ router.post(
       const firebaseToken = await admin
         .auth()
         .createCustomToken(userRecord.uid);
+
+      // Link the device ID to the user ID
+      if (device_id) {
+        const deviceRef = db.collection('DeviceRequests').doc(device_id);
+        await deviceRef.set(
+          { userId: userRecord.uid, requestCount: 0 },
+          { merge: true }
+        );
+      }
+
       res.status(200).json({ token: firebaseToken });
     } catch (error) {
       console.error('Error verifying code:', error);

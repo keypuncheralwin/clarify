@@ -6,5 +6,5 @@ export type ClickbaitResponse = {
   clarityScore: number;
   url: string;
   isVideo: boolean;
-  answer: string | null;
+  answer: string;
 };

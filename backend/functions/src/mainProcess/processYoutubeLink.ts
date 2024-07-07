@@ -4,7 +4,7 @@ import {
   getBase64ImageFromUrl,
   getYouTubeThumbnailUrls,
 } from '../utils/youtubeValidation';
-import { getChatResponse, processResponse } from '../utils/general';
+import { getChatResponse, hashUrl, processResponse } from '../utils/general';
 import {
   extractYouTubeID,
   fetchTranscript,
@@ -24,6 +24,10 @@ import { GoogleAIFileManager } from '@google/generative-ai/files';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { firestore } from 'firebase-admin';
+import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
+import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
+import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -35,10 +39,22 @@ import os from 'os';
 async function processYouTubeLink(
   url: string,
   res: Response,
-  apiKey: string
+  apiKey: string,
+  userUuid?: string
 ): Promise<void> {
   if (!extractYouTubeID(url)) {
     res.status(400).json({ error: 'Unable to extract video ID from URL' });
+    return;
+  }
+
+  const db = firestore();
+  const hashedUrl = hashUrl(url);
+
+  const alreadyAnalysed = await getAnalysedLinkIfExists(hashedUrl, db);
+
+  if (alreadyAnalysed) {
+    saveUrlToUserHistory(hashedUrl, db, userUuid);
+    res.json({ response: alreadyAnalysed });
     return;
   }
 
@@ -100,6 +116,8 @@ async function processYouTubeLink(
 
     if (response) {
       response = processResponse(response, 'youtube', url);
+      saveAnalysedLink(hashedUrl, db, url, response);
+      saveUrlToUserHistory(hashedUrl, db, userUuid);
       logger.info(`Received response: ${JSON.stringify(response)}`);
       res.json({ response });
     } else {

@@ -7,7 +7,11 @@ import {
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import fetchArticle from '../utils/fetchArticle';
-import { getChatResponse, processResponse } from '../utils/general';
+import { getChatResponse, hashUrl, processResponse } from '../utils/general';
+import { firestore } from 'firebase-admin';
+import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
+import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
+import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 
 /**
  * Process the article link and handle the entire flow.
@@ -19,19 +23,33 @@ import { getChatResponse, processResponse } from '../utils/general';
 async function processArticleLink(
   validUrl: string,
   res: Response,
-  apiKey: string
+  apiKey: string,
+  userUuid?: string
 ): Promise<void> {
-  const article = await fetchArticle(validUrl);
-  if (!article) {
-    res.status(400).send('Invalid URL');
+  //Initialise firestore
+  const db = firestore();
+  const hashedUrl = hashUrl(validUrl);
+
+  const alreadyAnalysed = await getAnalysedLinkIfExists(hashedUrl, db);
+
+  if (alreadyAnalysed) {
+    saveUrlToUserHistory(hashedUrl, db, userUuid);
+    res.json({ response: alreadyAnalysed });
     return;
   }
+
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const model = genAI.getGenerativeModel({
     model: 'gemini-1.5-flash',
     systemInstruction: clickbaitArticleCriteria,
   });
+
+  const article = await fetchArticle(validUrl);
+  if (!article) {
+    res.status(400).send('Invalid URL');
+    return;
+  }
 
   const { title, subtitle, content } = article;
   logger.info(`Fetched article: ${title}`);
@@ -54,6 +72,8 @@ async function processArticleLink(
 
     if (response) {
       response = processResponse(response, 'article', validUrl);
+      saveAnalysedLink(hashedUrl, db, validUrl, response);
+      saveUrlToUserHistory(hashedUrl, db, userUuid);
       logger.info(`Received response: ${JSON.stringify(response)}`);
       res.json({ response });
     } else {

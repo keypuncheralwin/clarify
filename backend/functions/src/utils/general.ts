@@ -3,6 +3,11 @@ import logger from '../logger/logger';
 import { ChatSession, Part } from '@google/generative-ai';
 import { clarityScoreDefinitionArticle } from '../constants/article';
 import { clarityScoreDefinitionYoutube } from '../constants/youtube';
+import * as crypto from 'crypto';
+
+export function hashUrl(url: string): string {
+  return crypto.createHash('sha256').update(url).digest('hex');
+}
 
 export const extractJson = (str: string): ClickbaitResponse | null => {
   try {

@@ -2,11 +2,10 @@ import { Router, Request, Response } from 'express';
 import extractValidUrl from '../utils/extractValidUrl';
 import processArticleLink from '../mainProcess/processArticleLink';
 import processYouTubeLink from '../mainProcess/processYoutubeLink';
-// import { verifyAuthToken } from '../middleware/authMiddleware';
 import { containsValidYoutubeUrl } from '../utils/youtubeValidation';
 import logger from '../logger/logger';
 import { specialCasesCheck } from '../utils/specialCaseUrlChecks';
-import { verifyAuthToken } from '../middleware/authMiddleware';
+import { verifyUserOrDevice } from '../middleware/authMiddleware';
 
 const router = Router();
 
@@ -14,7 +13,7 @@ const apiKey = process.env.GEMINI_API_TOKEN || '';
 
 router.post(
   '/analyse',
-  verifyAuthToken,
+  verifyUserOrDevice,
   async (req: Request, res: Response): Promise<void> => {
     if (!apiKey) {
       logger.error('Gemini API Key not loaded');
@@ -22,10 +21,8 @@ router.post(
       return;
     }
 
-    const { url, device_id } = req.body;
-    const userEmail = req.user?.email; // Access user email
-    logger.info(`Received URL: ${url} from user: ${userEmail}`);
-    logger.info(`Received URL: ${url} from device: ${device_id}`);
+    const { url } = req.body;
+    const userUuid = req.user?.uid;
 
     if (!url) {
       res.status(400).send('No URL provided');
@@ -35,7 +32,7 @@ router.post(
     try {
       const youTubeVideoLink = containsValidYoutubeUrl(url);
       if (youTubeVideoLink) {
-        await processYouTubeLink(youTubeVideoLink, res, apiKey);
+        await processYouTubeLink(youTubeVideoLink, res, apiKey, userUuid);
       } else {
         const validUrl = await extractValidUrl(url);
         if (!validUrl) {
@@ -43,7 +40,7 @@ router.post(
           return;
         }
         const finalUrl = specialCasesCheck(validUrl);
-        await processArticleLink(finalUrl, res, apiKey);
+        await processArticleLink(finalUrl, res, apiKey, userUuid);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
