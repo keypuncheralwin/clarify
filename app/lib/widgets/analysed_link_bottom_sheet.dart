@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnalysedLinkBottomSheet extends StatefulWidget {
   final bool isLoading;
@@ -387,6 +388,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
 
   Widget _buildActionButtons() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bool isVideo = _result?['isVideo'] ?? false;
+    final String url = _result?['url'] ?? '';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -404,7 +407,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: Text(
-              'First Action',
+              'Does Nothing',
               style: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white : Colors.deepPurple),
             ),
           ),
@@ -413,7 +416,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              // Implement your second button action here
+              _openLink(url, isVideo);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
@@ -422,9 +425,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            child: const Text(
-              'Second Action',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+            child: Text(
+              isVideo ? 'Watch Video' : 'Visit Link',
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
           ),
         ),
@@ -433,4 +436,25 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   }
 
 
+Future<void> _openLink(String url, bool isVideo) async {
+  if (isVideo) {
+    final Uri youtubeUri = Uri.parse('vnd.youtube:$url');
+    final Uri webYoutubeUri = Uri.parse(url);
+
+    if (await canLaunchUrl(youtubeUri)) {
+      await launchUrl(youtubeUri);
+    } else if (await canLaunchUrl(webYoutubeUri)) {
+      await launchUrl(webYoutubeUri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
+  } else {
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+}
 }
