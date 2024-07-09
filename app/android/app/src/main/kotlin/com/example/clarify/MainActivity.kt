@@ -57,7 +57,8 @@ class MainActivity : FlutterActivity() {
                                 "summary" to response.summary,
                                 "url" to response.url,
                                 "isVideo" to response.isVideo,
-                                "lastAnalysed" to response.lastAnalysed.toDate().toString()
+                                "hashedUrl" to response.hashedUrl,
+                                "analysedAt" to response.analysedAt
                             ))
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error analyzing link", e)

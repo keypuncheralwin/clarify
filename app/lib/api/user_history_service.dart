@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 
 class UserHistoryService {
   static const String baseUrl =
@@ -29,13 +28,6 @@ class UserHistoryService {
     }
 
     final Map<String, dynamic> data = jsonDecode(response.body);
-    final userHistory = data['userHistory'] as List;
-
-    // Convert analysedAt field to Timestamp
-    for (var item in userHistory) {
-      item['analysedAt'] = Timestamp.fromMillisecondsSinceEpoch(
-          item['analysedAt']['_seconds'] * 1000);
-    }
 
     return data;
   }

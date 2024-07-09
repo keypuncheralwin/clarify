@@ -2,7 +2,7 @@ package com.example.clarify
 
 import android.content.Context
 import android.provider.Settings
-import com.google.firebase.Timestamp
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -10,7 +10,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import android.util.Log
 import org.yaml.snakeyaml.Yaml
 import java.util.concurrent.TimeUnit
 
@@ -56,7 +55,8 @@ class ApiService(private val context: Context) {
             answer = jsonResponse.optString("answer"),
             url = jsonResponse.getString("url"),
             isVideo = jsonResponse.getBoolean("isVideo"),
-            lastAnalysed = jsonResponse.get("lastAnalysed") as? Timestamp ?: Timestamp.now()
+            hashedUrl = jsonResponse.getString("hashedUrl"),
+            analysedAt = jsonResponse.getString("analysedAt"),
         )
     }
 
@@ -86,6 +86,7 @@ data class AnalysedLinkResponse(
     val clarityScore: Int,
     val url: String,
     val isVideo: Boolean,
-    val answer: String? = null,
-    val lastAnalysed: Timestamp
+    val answer: String,
+    val hashedUrl: String,
+    val analysedAt: String,
 )

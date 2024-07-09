@@ -28,8 +28,8 @@ export async function getAnalysedLinkIfExists(
 
       if (!historySnapshot.empty) {
         const userHistoryDoc = historySnapshot.docs[0];
-        const lastAnalysed = userHistoryDoc.get('analysedAt');
-        analysedLinkResponse.lastAnalysed = lastAnalysed;
+        const analysedAt = userHistoryDoc.get('analysedAt');
+        analysedLinkResponse.analysedAt = analysedAt;
       }
     }
 

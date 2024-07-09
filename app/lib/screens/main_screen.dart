@@ -10,7 +10,6 @@ import 'package:clarify/api/analyse_link.dart';
 import 'package:clarify/utils/url_validator.dart';
 import 'package:flutter/services.dart';
 import 'package:clarify/providers/auth_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -24,7 +23,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Map<String, dynamic>? _result;
   bool _isLoading = false;
   String? _errorMessage;
-  final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey = GlobalKey<AnalysedLinkBottomSheetState>();
+  final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey =
+      GlobalKey<AnalysedLinkBottomSheetState>();
 
   final List<Widget> _children = [
     const HomeScreen(),
@@ -56,19 +56,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       setState(() {
         _result = result;
         _isLoading = false;
-        _bottomSheetKey.currentState?.updateContent(_isLoading, _result, _errorMessage);
+        _bottomSheetKey.currentState
+            ?.updateContent(_isLoading, _result, _errorMessage);
       });
 
       if (result != null) {
         final historyItem = {
-          'analysedAt': Timestamp.now(),
           'analysedLink': result,
         };
         ref.read(userHistoryProvider.notifier).addNewHistory(historyItem);
       }
     } else {
       setState(() {
-        _errorMessage = "No valid URL found in your clipboard. Make sure you have copied a valid link first before tapping the link button.";
+        _errorMessage =
+            "No valid URL found in your clipboard. Make sure you have copied a valid link first before tapping the link button.";
         _isLoading = false;
       });
       _showBottomSheet();

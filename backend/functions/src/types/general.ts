@@ -14,12 +14,12 @@ export type ProcessedAIResponse = AIResponse & {
 
 export interface AnalysedLinkResponse extends ProcessedAIResponse {
   hashedUrl: string;
-  lastAnalysed: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue;
+  analysedAt: string;
 }
 
 export interface UserHistoryItem {
   historyId: string;
-  analysedAt: FirebaseFirestore.Timestamp;
+  analysedAt: string;
   hashedUrl: string;
   analysedLink: AnalysedLinkResponse;
 }

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
 import 'package:clarify/widgets/clarity_score_pill.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +21,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
         ref.read(userHistoryProvider.notifier).fetchMoreHistory();
       }
     });
@@ -41,7 +42,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : isInitialLoading
               ? _buildInitialLoadingSkeleton()
               : RefreshIndicator(
-                  onRefresh: () => ref.read(userHistoryProvider.notifier).refreshHistory(),
+                  onRefresh: () =>
+                      ref.read(userHistoryProvider.notifier).refreshHistory(),
                   child: _buildUserHistory(userHistory, isLoadingMore),
                 ),
     );
@@ -80,17 +82,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildUserHistory(List<Map<String, dynamic>> userHistory, bool isLoadingMore) {
+  Widget _buildUserHistory(
+      List<Map<String, dynamic>> userHistory, bool isLoadingMore) {
     return ListView.builder(
       controller: _scrollController,
-      itemCount: userHistory.length + (isLoadingMore ? 3 : 0), // Show skeleton items only when loading more
+      itemCount: userHistory.length +
+          (isLoadingMore ? 3 : 0), // Show skeleton items only when loading more
       itemBuilder: (context, index) {
         if (index >= userHistory.length) {
           return const SkeletonListTile();
         }
 
         final item = userHistory[index];
-        final analysedAt = (item['analysedAt'] as Timestamp).toDate();
+        final analysedAt = DateFormat.yMMMd().add_jm().format(
+            DateTime.parse(item['analysedLink']['analysedAt']).toLocal());
 
         return Column(
           children: [
@@ -99,7 +104,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _showBottomSheet(item);
               },
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 title: Text(
                   item['analysedLink']['title'],
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -107,15 +113,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClarityScorePill(clarityScore: item['analysedLink']['clarityScore']),
+                    ClarityScorePill(
+                        clarityScore: item['analysedLink']['clarityScore']),
                     const SizedBox(height: 4),
-                    Text('Analysed At: ${analysedAt.toLocal()}'),
+                    Text('Analysed At: $analysedAt'),
                   ],
                 ),
                 trailing: const Icon(Icons.arrow_drop_down),
               ),
             ),
-            const Divider(height: 1, thickness: 1), // Add a divider between items
+            const Divider(
+                height: 1, thickness: 1), // Add a divider between items
           ],
         );
       },

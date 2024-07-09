@@ -1,4 +1,3 @@
-import admin from 'firebase-admin';
 import { firestore } from 'firebase-admin';
 import logger from '../logger/logger';
 import { AnalysedLinkResponse, ProcessedAIResponse } from '../types/general';
@@ -8,10 +7,12 @@ export async function saveAnalysedLink(
   db: firestore.Firestore,
   processedAIResponse: ProcessedAIResponse
 ): Promise<AnalysedLinkResponse> {
+  const timeStamp = new Date().toISOString(); // Store in ISO format (UTC)
+
   const analysedLink: AnalysedLinkResponse = {
     ...processedAIResponse,
     hashedUrl,
-    lastAnalysed: admin.firestore.FieldValue.serverTimestamp(),
+    analysedAt: timeStamp,
   };
 
   const urlRef = db.collection('AnalysedLinks').doc(hashedUrl);
