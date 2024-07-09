@@ -1,18 +1,17 @@
 import admin from 'firebase-admin';
 import { firestore } from 'firebase-admin';
-import { ClickbaitResponse } from '../types/general';
 import logger from '../logger/logger';
+import { AnalysedLinkResponse, ProcessedAIResponse } from '../types/general';
 
 export async function saveAnalysedLink(
   hashedUrl: string,
   db: firestore.Firestore,
-  url: string,
-  analysedLink: ClickbaitResponse
-): Promise<void> {
-  const urlData = {
-    ...analysedLink,
-    originalUrl: url,
-    lastanalysed: admin.firestore.FieldValue.serverTimestamp(),
+  processedAIResponse: ProcessedAIResponse
+): Promise<AnalysedLinkResponse> {
+  const analysedLink: AnalysedLinkResponse = {
+    ...processedAIResponse,
+    hashedUrl,
+    lastAnalysed: admin.firestore.FieldValue.serverTimestamp(),
   };
 
   const urlRef = db.collection('AnalysedLinks').doc(hashedUrl);
@@ -22,13 +21,14 @@ export async function saveAnalysedLink(
       const urlDoc = await transaction.get(urlRef);
 
       if (!urlDoc.exists) {
-        transaction.set(urlRef, urlData);
+        transaction.set(urlRef, analysedLink);
       }
     });
 
-    logger.info('URL details saved successfully');
+    logger.info('Analysed link details saved successfully');
+    return analysedLink;
   } catch (error) {
-    logger.error('Error saving URL details:', error);
-    throw new Error('Error saving URL details');
+    logger.error('Error saving Analysed link details:', error);
+    throw new Error('Error saving Analysed link details');
   }
 }

@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl = 'https://ce2a-122-150-251-96.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
+  static const String baseUrl =
+      'https://8743-122-150-251-249.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
 
   static Future<void> sendVerificationCode(String email) async {
     final response = await http.post(
@@ -20,7 +21,8 @@ class AuthService {
     }
   }
 
-  static Future<Map<String, dynamic>> verifyCode(String email, String code) async {
+  static Future<Map<String, dynamic>> verifyCode(
+      String email, String code) async {
     final response = await http.post(
       Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{
@@ -40,7 +42,8 @@ class AuthService {
     return data;
   }
 
-  static Future<String> createUser(String email, String code, String name) async {
+  static Future<String> createUser(
+      String email, String code, String name) async {
     final response = await http.post(
       Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{

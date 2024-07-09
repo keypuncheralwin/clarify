@@ -1,11 +1,19 @@
+import 'package:clarify/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/user_history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
-  UserHistoryNotifier() : super([]) {
-    _fetchInitialUserHistory();
+  UserHistoryNotifier(this.ref) : super([]) {
+    fetchInitialUserHistory();
+    ref.listen<User?>(authStateProvider, (previous, next) {
+      if (previous == null && next != null) {
+        fetchInitialUserHistory();
+      }
+    });
   }
 
+  final Ref ref;
   bool _isLoading = false;
   bool isLoadingMore = false;
   bool isInitialLoading = true; // Track initial loading state
@@ -13,14 +21,16 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   String? _nextPageToken;
   bool _hasMore = true;
 
-  Future<void> _fetchUserHistory() async {
+  Future<void> fetchUserHistory() async {
     if (_isLoading) return;
 
     _isLoading = true;
 
     try {
-      final response = await UserHistoryService.fetchUserHistory(10, pageToken: _nextPageToken);
-      final List<Map<String, dynamic>> newItems = List<Map<String, dynamic>>.from(response['userHistory']);
+      final response = await UserHistoryService.fetchUserHistory(10,
+          pageToken: _nextPageToken);
+      final List<Map<String, dynamic>> newItems =
+          List<Map<String, dynamic>>.from(response['userHistory']);
 
       state = [...state, ...newItems];
       _nextPageToken = response['nextPageToken'];
@@ -33,10 +43,11 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
     }
   }
 
-  Future<void> _fetchInitialUserHistory() async {
+  Future<void> fetchInitialUserHistory() async {
+    print("AREE: fetching initial user history");
     isInitialLoading = true;
     state = [];
-    await _fetchUserHistory();
+    await fetchUserHistory();
     isInitialLoading = false;
     state = [...state]; // Trigger state change to update the UI
   }
@@ -48,7 +59,8 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
 
     try {
       final response = await UserHistoryService.fetchUserHistory(10);
-      final List<Map<String, dynamic>> newItems = List<Map<String, dynamic>>.from(response['userHistory']);
+      final List<Map<String, dynamic>> newItems =
+          List<Map<String, dynamic>>.from(response['userHistory']);
 
       state = [...newItems, ...state];
     } catch (e) {
@@ -70,13 +82,14 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
     isLoadingMore = true;
     state = [...state]; // Trigger state change to update the UI
 
-    await _fetchUserHistory();
+    await fetchUserHistory();
 
     isLoadingMore = false;
     state = [...state]; // Trigger state change to update the UI
   }
 }
 
-final userHistoryProvider = StateNotifierProvider<UserHistoryNotifier, List<Map<String, dynamic>>>(
-  (ref) => UserHistoryNotifier(),
+final userHistoryProvider =
+    StateNotifierProvider<UserHistoryNotifier, List<Map<String, dynamic>>>(
+  (ref) => UserHistoryNotifier(ref),
 );

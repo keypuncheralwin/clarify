@@ -1,23 +1,5 @@
 import { firestore } from 'firebase-admin';
-
-interface AnalysedLink {
-  title: string;
-  isClickBait: boolean;
-  clarityScore: number;
-  explanation: string;
-  answer: string;
-  summary: string;
-  isVideo: boolean;
-  originalUrl: string;
-  lastAnalysed: FirebaseFirestore.Timestamp;
-}
-
-interface UserHistoryItem {
-  historyId: string;
-  analysedAt: FirebaseFirestore.Timestamp;
-  hashedUrl: string;
-  analysedLink: AnalysedLink;
-}
+import { AnalysedLinkResponse, UserHistoryItem } from '../types/general';
 
 interface UserHistoryResponse {
   userHistory: Array<UserHistoryItem>;
@@ -63,7 +45,7 @@ export async function fetchUserHistory(
       .get();
 
     if (analysedLinkDoc.exists) {
-      const analysedLinkData = analysedLinkDoc.data() as AnalysedLink;
+      const analysedLinkData = analysedLinkDoc.data() as AnalysedLinkResponse;
 
       if (analysedLinkData.title.includes(searchKeyword)) {
         userHistoryData.push({

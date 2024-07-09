@@ -1,4 +1,4 @@
-import { ClickbaitResponse } from '../types/general';
+import { AIResponse, ProcessedAIResponse } from '../types/general';
 import logger from '../logger/logger';
 import { ChatSession, Part } from '@google/generative-ai';
 import { clarityScoreDefinitionArticle } from '../constants/article';
@@ -9,7 +9,7 @@ export function hashUrl(url: string): string {
   return crypto.createHash('sha256').update(url).digest('hex');
 }
 
-export const extractJson = (str: string): ClickbaitResponse | null => {
+export const extractJson = (str: string): AIResponse | null => {
   try {
     // Remove backticks and 'json' string from the beginning and end
     let cleanStr = str.replace(/```json\s*|```/g, '');
@@ -41,11 +41,10 @@ export const extractJson = (str: string): ClickbaitResponse | null => {
 export const getChatResponse = async (
   prompt: string | Array<string | Part>,
   chatSession: ChatSession
-): Promise<ClickbaitResponse | null> => {
+): Promise<AIResponse | null> => {
   try {
     const result = await chatSession.sendMessage(prompt);
     const responseText = result.response.text();
-    logger.info('Response text received', { responseText });
     return extractJson(responseText);
   } catch (error) {
     logger.error('Error processing prompt', error);
@@ -54,10 +53,10 @@ export const getChatResponse = async (
 };
 
 export const processResponse = (
-  response: ClickbaitResponse,
+  response: AIResponse,
   type: 'youtube' | 'article',
   url: string
-): ClickbaitResponse => {
+): ProcessedAIResponse => {
   const clarityScoreDefinition =
     type === 'youtube'
       ? clarityScoreDefinitionYoutube

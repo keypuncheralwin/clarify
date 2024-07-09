@@ -27,7 +27,6 @@ router.get(
         pageToken as string,
         searchKeyword as string
       );
-
       res.status(200).json(response);
     } catch (error) {
       logger.error('Error fetching user history:', error);

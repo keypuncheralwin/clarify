@@ -10,7 +10,7 @@
         android:usesCleartextTraffic="true">
     
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.clarify.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -34,7 +34,7 @@
         </activity>
 
         <activity
-            android:name=".CustomShareActivity"
+            android:name="com.example.clarify.CustomShareActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>

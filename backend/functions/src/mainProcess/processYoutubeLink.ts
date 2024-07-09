@@ -50,7 +50,11 @@ async function processYouTubeLink(
   const db = firestore();
   const hashedUrl = hashUrl(url);
 
-  const alreadyAnalysed = await getAnalysedLinkIfExists(hashedUrl, db);
+  const alreadyAnalysed = await getAnalysedLinkIfExists(
+    hashedUrl,
+    db,
+    userUuid
+  );
 
   if (alreadyAnalysed) {
     saveUrlToUserHistory(hashedUrl, db, userUuid);
@@ -112,16 +116,20 @@ async function processYouTubeLink(
       },
     ];
 
-    let response = await getChatResponse(messageParts, chatSession);
+    const aiResponse = await getChatResponse(messageParts, chatSession);
 
-    if (response) {
-      response = processResponse(response, 'youtube', url);
-      saveAnalysedLink(hashedUrl, db, url, response);
-      saveUrlToUserHistory(hashedUrl, db, userUuid);
-      logger.info(`Received response: ${JSON.stringify(response)}`);
-      res.json({ response });
+    if (aiResponse) {
+      const processedAIResponse = processResponse(aiResponse, 'youtube', url);
+      const analysedLink = await saveAnalysedLink(
+        hashedUrl,
+        db,
+        processedAIResponse
+      );
+      await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
+      res.json({ Response: analysedLink });
     } else {
-      logger.error('No response received from the chat session');
+      logger.error('No response received from the AI chat session');
       res.status(500).send('Internal Server Error');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

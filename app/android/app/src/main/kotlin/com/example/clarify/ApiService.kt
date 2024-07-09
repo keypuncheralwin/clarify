@@ -1,7 +1,8 @@
-package com.clarify.app
+package com.example.clarify
 
 import android.content.Context
 import android.provider.Settings
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -20,7 +21,7 @@ class ApiService(private val context: Context) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    suspend fun analyzeLink(link: String, idToken: String?): ClickbaitResponse = withContext(Dispatchers.IO) {
+    suspend fun analyzeLink(link: String, idToken: String?): AnalysedLinkResponse = withContext(Dispatchers.IO) {
         val url = readConfig()
         val deviceId = getDeviceId() ?: "NO_DEVICE_ID"
         val json = JSONObject().apply {
@@ -46,7 +47,7 @@ class ApiService(private val context: Context) {
         Log.d("ApiService", "Response: $responseBody")
 
         val jsonResponse = JSONObject(responseBody).getJSONObject("response")
-        ClickbaitResponse(
+        AnalysedLinkResponse(
             title = jsonResponse.getString("title"),
             isClickBait = jsonResponse.getBoolean("isClickBait"),
             explanation = jsonResponse.getString("explanation"),
@@ -54,7 +55,8 @@ class ApiService(private val context: Context) {
             clarityScore = jsonResponse.getInt("clarityScore"),
             answer = jsonResponse.optString("answer"),
             url = jsonResponse.getString("url"),
-            isVideo = jsonResponse.getBoolean("isVideo")
+            isVideo = jsonResponse.getBoolean("isVideo"),
+            lastAnalysed = jsonResponse.get("lastAnalysed") as? Timestamp ?: Timestamp.now()
         )
     }
 
@@ -76,7 +78,7 @@ class ApiService(private val context: Context) {
     }
 }
 
-data class ClickbaitResponse(
+data class AnalysedLinkResponse(
     val title: String,
     val isClickBait: Boolean,
     val explanation: String,
@@ -84,5 +86,6 @@ data class ClickbaitResponse(
     val clarityScore: Int,
     val url: String,
     val isVideo: Boolean,
-    val answer: String? = null
+    val answer: String? = null,
+    val lastAnalysed: Timestamp
 )

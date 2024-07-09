@@ -1,4 +1,4 @@
-package com.clarify.app
+package com.example.clarify
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -57,6 +57,7 @@ class MainActivity : FlutterActivity() {
                                 "summary" to response.summary,
                                 "url" to response.url,
                                 "isVideo" to response.isVideo,
+                                "lastAnalysed" to response.lastAnalysed.toDate().toString()
                             ))
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error analyzing link", e)

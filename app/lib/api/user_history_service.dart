@@ -4,9 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 
 class UserHistoryService {
-  static const String baseUrl = 'https://ce2a-122-150-251-96.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
+  static const String baseUrl =
+      'https://8743-122-150-251-249.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
 
-  static Future<Map<String, dynamic>> fetchUserHistory(int pageSize, {String? pageToken, String searchKeyword = ''}) async {
+  static Future<Map<String, dynamic>> fetchUserHistory(int pageSize,
+      {String? pageToken, String searchKeyword = ''}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       throw Exception('User not logged in');
@@ -14,7 +16,8 @@ class UserHistoryService {
 
     final idToken = await user.getIdToken();
     final response = await http.get(
-      Uri.parse('$baseUrl/user-history?pageSize=$pageSize&pageToken=$pageToken&searchKeyword=$searchKeyword'),
+      Uri.parse(
+          '$baseUrl/user-history?pageSize=$pageSize&pageToken=$pageToken&searchKeyword=$searchKeyword'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $idToken',
@@ -30,7 +33,8 @@ class UserHistoryService {
 
     // Convert analysedAt field to Timestamp
     for (var item in userHistory) {
-      item['analysedAt'] = Timestamp.fromMillisecondsSinceEpoch(item['analysedAt']['_seconds'] * 1000);
+      item['analysedAt'] = Timestamp.fromMillisecondsSinceEpoch(
+          item['analysedAt']['_seconds'] * 1000);
     }
 
     return data;

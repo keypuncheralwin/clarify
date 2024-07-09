@@ -1,4 +1,4 @@
-package com.clarify.app
+package com.example.clarify
 
 import android.app.Activity
 import android.content.Context
@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
+import com.clarify.app.R
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -136,7 +137,7 @@ class CustomShareActivity : Activity() {
         user?.getIdToken(false)?.await()?.token
     }
 
-    private fun displayResult(result: ClickbaitResponse) {
+    private fun displayResult(result: AnalysedLinkResponse) {
         shimmerTitle.stopShimmer()
         shimmerTitle.visibility = View.GONE
         shimmerContent.stopShimmer()

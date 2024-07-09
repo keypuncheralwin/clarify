@@ -30,7 +30,11 @@ async function processArticleLink(
   const db = firestore();
   const hashedUrl = hashUrl(validUrl);
 
-  const alreadyAnalysed = await getAnalysedLinkIfExists(hashedUrl, db);
+  const alreadyAnalysed = await getAnalysedLinkIfExists(
+    hashedUrl,
+    db,
+    userUuid
+  );
 
   if (alreadyAnalysed) {
     saveUrlToUserHistory(hashedUrl, db, userUuid);
@@ -68,16 +72,24 @@ async function processArticleLink(
   logger.info(`Prompt: ${prompt}`);
 
   try {
-    let response = await getChatResponse(prompt, chatSession);
+    const aiResponse = await getChatResponse(prompt, chatSession);
 
-    if (response) {
-      response = processResponse(response, 'article', validUrl);
-      saveAnalysedLink(hashedUrl, db, validUrl, response);
-      saveUrlToUserHistory(hashedUrl, db, userUuid);
-      logger.info(`Received response: ${JSON.stringify(response)}`);
-      res.json({ response });
+    if (aiResponse) {
+      const processedAIResponse = processResponse(
+        aiResponse,
+        'article',
+        validUrl
+      );
+      const analysedLink = await saveAnalysedLink(
+        hashedUrl,
+        db,
+        processedAIResponse
+      );
+      await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
+      res.json({ response: analysedLink });
     } else {
-      logger.error('No response received from the chat session');
+      logger.error('No response received from the AI chat sesssion');
       res.status(500).send('Internal Server Error');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
