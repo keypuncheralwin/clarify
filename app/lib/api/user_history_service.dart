@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserHistoryService {
-  static const String baseUrl =
-      'https://8743-122-150-251-249.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
+  static final String baseUrl =
+      dotenv.env['BASE_URL'] ?? ''; // Replace with your backend URL
 
   static Future<Map<String, dynamic>> fetchUserHistory(int pageSize,
       {String? pageToken, String searchKeyword = ''}) async {

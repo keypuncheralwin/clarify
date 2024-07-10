@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  static const String baseUrl =
-      'https://8743-122-150-251-249.ngrok-free.app/clarify-c7c86/us-central1/api'; // Replace with your backend URL
+  static final String baseUrl = dotenv.env['BASE_URL'] ??
+      ''; // Use environment variable; // Replace with your backend URL
 
   static Future<void> sendVerificationCode(String email) async {
     final response = await http.post(

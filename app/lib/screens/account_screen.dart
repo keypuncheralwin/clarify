@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/providers/theme_provider.dart';
 import 'package:clarify/providers/auth_provider.dart';
@@ -27,7 +28,8 @@ class AccountScreen extends ConsumerWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
                       ),
                       child: const Text(
                         'Sign in or create an account',
@@ -134,7 +136,7 @@ class AccountScreen extends ConsumerWidget {
               context,
               icon: Icons.info_outline,
               title: 'App Version',
-              subtitle: '1.0.0', // Replace with actual app version
+              subtitle: dotenv.env['APP_VER'],
               isDarkMode: isDarkMode,
             ),
             if (user != null)
@@ -174,7 +176,8 @@ class AccountScreen extends ConsumerWidget {
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Colors.black54),
             )
           : null,
       trailing: trailing,

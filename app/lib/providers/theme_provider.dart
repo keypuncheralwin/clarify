@@ -7,7 +7,7 @@ final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeData>((ref) {
 });
 
 class ThemeNotifier extends StateNotifier<ThemeData> {
-  ThemeNotifier() : super(_lightTheme) {
+  ThemeNotifier() : super(_darkTheme) {
     _loadTheme();
   }
 
