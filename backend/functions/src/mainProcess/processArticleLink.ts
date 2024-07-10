@@ -12,6 +12,7 @@ import { firestore } from 'firebase-admin';
 import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
+import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 
 /**
  * Process the article link and handle the entire flow.
@@ -51,6 +52,7 @@ async function processArticleLink(
 
   const article = await fetchArticle(validUrl);
   if (!article) {
+    saveFailedToAnalyseLink(validUrl, hashedUrl, db);
     res.status(400).send('Invalid URL');
     return;
   }
@@ -90,11 +92,13 @@ async function processArticleLink(
       res.json({ response: analysedLink });
     } else {
       logger.error('No response received from the AI chat sesssion');
+      saveFailedToAnalyseLink(validUrl, hashedUrl, db);
       res.status(500).send('Internal Server Error');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     logger.error(`Error processing article: ${error?.message}`, error);
+    saveFailedToAnalyseLink(validUrl, hashedUrl, db);
     res.status(500).send('Internal Server Error');
   }
 }

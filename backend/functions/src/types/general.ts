@@ -23,3 +23,11 @@ export interface UserHistoryItem {
   hashedUrl: string;
   analysedLink: AnalysedLinkResponse;
 }
+
+export interface FailedToAnalyseResponse {
+  url: string;
+  hashedUrl: string;
+  visitCount: number;
+  firstAttemptedAt: string;
+  lastAttemptedAt: string;
+}

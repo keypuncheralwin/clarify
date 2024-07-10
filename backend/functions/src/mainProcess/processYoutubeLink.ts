@@ -28,6 +28,7 @@ import { firestore } from 'firebase-admin';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
+import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -42,13 +43,14 @@ async function processYouTubeLink(
   apiKey: string,
   userUuid?: string
 ): Promise<void> {
+  const db = firestore();
+  const hashedUrl = hashUrl(url);
+
   if (!extractYouTubeID(url)) {
+    saveFailedToAnalyseLink(url, hashedUrl, db);
     res.status(400).json({ error: 'Unable to extract video ID from URL' });
     return;
   }
-
-  const db = firestore();
-  const hashedUrl = hashUrl(url);
 
   const alreadyAnalysed = await getAnalysedLinkIfExists(
     hashedUrl,
@@ -130,12 +132,14 @@ async function processYouTubeLink(
       res.json({ Response: analysedLink });
     } else {
       logger.error('No response received from the AI chat session');
+      saveFailedToAnalyseLink(url, hashedUrl, db);
       res.status(500).send('Internal Server Error');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);
+      saveFailedToAnalyseLink(url, hashedUrl, db);
       res
         .status(400)
         .json({ error: 'Transcript fetch error', details: error.message });
@@ -147,6 +151,7 @@ async function processYouTubeLink(
         },
         error
       );
+      saveFailedToAnalyseLink(url, hashedUrl, db);
       res.status(400).json({
         error:
           'Content was blocked due to safety concerns. Please try with a different input.',
@@ -154,6 +159,7 @@ async function processYouTubeLink(
       });
     } else {
       logger.error('Error processing YouTube link', error);
+      saveFailedToAnalyseLink(url, hashedUrl, db);
       res.status(500).json({
         error: 'Failed to process YouTube link',
         details: error.message,

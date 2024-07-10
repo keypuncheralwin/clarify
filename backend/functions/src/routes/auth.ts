@@ -18,7 +18,7 @@ router.post(
     try {
       const code = Math.floor(1000 + Math.random() * 9000).toString();
       const db = firestore();
-      const docRef = db.collection('verificationCodes').doc(email);
+      const docRef = db.collection('VerificationCodes').doc(email);
       await docRef.set({
         code,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -46,7 +46,7 @@ router.post(
 
     try {
       const db = firestore();
-      const docRef = db.collection('verificationCodes').doc(email);
+      const docRef = db.collection('VerificationCodes').doc(email);
       const doc = await docRef.get();
 
       if (!doc.exists) {
