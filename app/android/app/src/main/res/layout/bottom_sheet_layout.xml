@@ -30,7 +30,8 @@
             android:textStyle="bold"
             android:textSize="18sp"
             android:layout_marginTop="8dp"
-            android:layout_alignParentStart="true"/>
+            android:layout_alignParentStart="true"
+            android:textIsSelectable="true"/>
 
         <TextView
             android:id="@+id/clarityScoreTextView"
@@ -100,7 +101,8 @@
         android:textColor="@android:color/black"
         android:textStyle="italic"
         android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:textIsSelectable="true"/>
 
     <TextView
         android:id="@+id/summaryTextView"
@@ -110,5 +112,6 @@
         android:text="Summary"
         android:textColor="@android:color/black"
         android:textSize="14sp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:textIsSelectable="true"/>
 </LinearLayout>
