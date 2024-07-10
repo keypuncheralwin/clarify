@@ -1,3 +1,4 @@
+import 'package:clarify/utils/clarity_score_calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -61,7 +62,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     }
   }
 
-  void updateContent(bool isLoading, Map<String, dynamic>? result, String? errorMessage) {
+  void updateContent(
+      bool isLoading, Map<String, dynamic>? result, String? errorMessage) {
     setState(() {
       _isLoading = isLoading;
       _result = result;
@@ -69,23 +71,13 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     });
   }
 
-  Color _getClarityScoreColor(int score) {
-    if (score >= 0 && score <= 4) {
-      return const Color(0xFFfe2712);
-    } else if (score >= 5 && score <= 6) {
-      return const Color(0xFFfb9902);
-    } else if (score >= 7 && score <= 10) {
-      return const Color(0xFF66b032);
-    } else {
-      return Colors.grey;
-    }
-  }
-
   void _showTooltip(BuildContext context, String explanation) {
     _removeTooltip(); // Ensure any existing tooltip is removed
 
-    final RenderBox renderBox = _buttonKey.currentContext!.findRenderObject() as RenderBox;
-    final overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _buttonKey.currentContext!.findRenderObject() as RenderBox;
+    final overlay =
+        Overlay.of(context)!.context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
 
     OverlayState? overlayState = Overlay.of(context);
@@ -118,19 +110,23 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                           onTap: () {
                             _removeTooltip();
                           },
-                          child: const Icon(Icons.close, color: Colors.white70, size: 20),
+                          child: const Icon(Icons.close,
+                              color: Colors.white70, size: 20),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 25.0, right: 0, left: 0, bottom: 0),
+                        padding: const EdgeInsets.only(
+                            top: 25.0, right: 0, left: 0, bottom: 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 5, right: 15, left: 15, bottom: 15),
+                              padding: const EdgeInsets.only(
+                                  top: 5, right: 15, left: 15, bottom: 15),
                               child: Text(
                                 explanation,
-                                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                                style: const TextStyle(
+                                    color: Colors.white70, fontSize: 12),
                               ),
                             ),
                           ],
@@ -166,11 +162,13 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
           Navigator.of(context).pop();
         }
       },
-      behavior: HitTestBehavior.opaque, // Ensure tap outside bottom sheet is detected
+      behavior:
+          HitTestBehavior.opaque, // Ensure tap outside bottom sheet is detected
       child: Container(
         color: Colors.transparent,
         child: GestureDetector(
-          onTap: () {}, // Override onTap to prevent closing when tapping the sheet
+          onTap:
+              () {}, // Override onTap to prevent closing when tapping the sheet
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -186,7 +184,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop(); // Close bottom sheet on dash tap
+                    Navigator.of(context)
+                        .pop(); // Close bottom sheet on dash tap
                   },
                   child: Center(
                     child: Container(
@@ -205,13 +204,18 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                     : _errorMessage != null
                         ? SelectableText(
                             _errorMessage!,
-                            style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                            style: TextStyle(
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black),
                           )
                         : _result != null
                             ? _buildResultContent(_result!, isDarkMode)
                             : SelectableText(
                                 'No data available',
-                                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                                style: TextStyle(
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                 const SizedBox(height: 10),
                 _buildActionButtons(), // Updated to show two buttons
@@ -270,7 +274,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     final summary = result['summary'] ?? 'No summary available';
     final combinedLength = answer.length + summary.length;
 
-    double containerHeight = MediaQuery.of(context).size.height * 0.5; // 50% of the screen height
+    double containerHeight =
+        MediaQuery.of(context).size.height * 0.5; // 50% of the screen height
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,17 +295,20 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             _showTooltip(context, explanation);
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: _getClarityScoreColor(clarityScoreValue),
+            backgroundColor: getClarityScoreColor(clarityScoreValue),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            minimumSize: const Size(0, 0), // Removes default minimum size constraints
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Shrinks the tap target size
+            minimumSize:
+                const Size(0, 0), // Removes default minimum size constraints
+            tapTargetSize:
+                MaterialTapTargetSize.shrinkWrap, // Shrinks the tap target size
           ),
           child: Text(
             'Clarity Score: $clarityScore',
-            style: const TextStyle(color: Colors.white, fontSize: 12), // Smaller font size
+            style: const TextStyle(
+                color: Colors.white, fontSize: 12), // Smaller font size
           ),
         ),
         const SizedBox(height: 10),
@@ -321,7 +329,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontStyle: FontStyle.italic,
-                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                                color: isDarkMode
+                                    ? Colors.white70
+                                    : Colors.black87,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -354,7 +364,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                               Colors.transparent.withOpacity(0.3),
                               Colors.transparent.withOpacity(0.4),
                               Colors.transparent.withOpacity(0.5),
-                              isDarkMode ? const Color(0xFF2B2B2B) : const Color(0xFFFFFFFF),
+                              isDarkMode
+                                  ? const Color(0xFF2B2B2B)
+                                  : const Color(0xFFFFFFFF),
                             ],
                           ),
                         ),
@@ -400,7 +412,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
               // Implement your first button action here
             },
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: isDarkMode ? Colors.white : Colors.deepPurple),
+              side: BorderSide(
+                  color: isDarkMode ? Colors.white : Colors.deepPurple),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -408,7 +421,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             ),
             child: Text(
               'Does Nothing',
-              style: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white : Colors.deepPurple),
+              style: TextStyle(
+                  fontSize: 16,
+                  color: isDarkMode ? Colors.white : Colors.deepPurple),
             ),
           ),
         ),
@@ -435,26 +450,25 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     );
   }
 
+  Future<void> _openLink(String url, bool isVideo) async {
+    if (isVideo) {
+      final Uri youtubeUri = Uri.parse('vnd.youtube:$url');
+      final Uri webYoutubeUri = Uri.parse(url);
 
-Future<void> _openLink(String url, bool isVideo) async {
-  if (isVideo) {
-    final Uri youtubeUri = Uri.parse('vnd.youtube:$url');
-    final Uri webYoutubeUri = Uri.parse(url);
-
-    if (await canLaunchUrl(youtubeUri)) {
-      await launchUrl(youtubeUri);
-    } else if (await canLaunchUrl(webYoutubeUri)) {
-      await launchUrl(webYoutubeUri, mode: LaunchMode.externalApplication);
+      if (await canLaunchUrl(youtubeUri)) {
+        await launchUrl(youtubeUri);
+      } else if (await canLaunchUrl(webYoutubeUri)) {
+        await launchUrl(webYoutubeUri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
     } else {
-      throw 'Could not launch $url';
-    }
-  } else {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Could not launch $url';
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
     }
   }
-}
 }
