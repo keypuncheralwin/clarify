@@ -41,63 +41,50 @@ class CustomShareActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("CustomShareActivity", "onCreate called")
-        setAppTheme()
         setupBottomSheetDialog()
         handleIntent(intent)
     }
 
-    private fun setAppTheme() {
-        val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", true)
-        Log.d("CustomShareActivity", "setAppTheme isDarkMode: $isDarkMode")
-        
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            Log.d("CustomShareActivity", "AppCompatDelegate.MODE_NIGHT_YES applied")
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            Log.d("CustomShareActivity", "AppCompatDelegate.MODE_NIGHT_NO applied")
-        }
-    }
-
     private fun setupBottomSheetDialog() {
         Log.d("CustomShareActivity", "Setting up bottom sheet dialog")
-
+    
         val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", false)
+        val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", true)
         Log.d("CustomShareActivity", "setupBottomSheetDialog isDarkMode: $isDarkMode")
-
-        val layoutRes = if (isDarkMode) {
-            R.layout.bottom_sheet_layout_night
+    
+        val (themeMode, layoutRes, themeResId) = if (isDarkMode) {
+            Triple(AppCompatDelegate.MODE_NIGHT_YES, R.layout.bottom_sheet_layout_night, R.style.DarkBottomSheetDialog)
         } else {
-            R.layout.bottom_sheet_layout
+            Triple(AppCompatDelegate.MODE_NIGHT_NO, R.layout.bottom_sheet_layout, R.style.LightBottomSheetDialog)
         }
-
+    
+        AppCompatDelegate.setDefaultNightMode(themeMode)
+        Log.d("CustomShareActivity", "AppCompatDelegate.setDefaultNightMode applied")
+    
         val bottomSheetView = LayoutInflater.from(this).inflate(layoutRes, null)
-        val themeResId = if (isDarkMode) R.style.DarkBottomSheetDialog else R.style.LightBottomSheetDialog
         bottomSheetDialog = BottomSheetDialog(this, themeResId)
         bottomSheetDialog.setContentView(bottomSheetView)
-
+    
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
-
+    
         bottomSheetDialog.setOnDismissListener {
             Log.d("CustomShareActivity", "Bottom sheet dismissed")
             finish()
         }
-
+    
         shimmerTitle = bottomSheetView.findViewById(R.id.shimmerTitle)
         shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
-
+    
         bottomSheetView.setOnClickListener {
             hideTooltip()
         }
-
+    
         clarityScoreTextView.setOnClickListener {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
         }
