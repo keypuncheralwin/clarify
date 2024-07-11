@@ -40,36 +40,44 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "analyzeLink") {
-                val url = call.argument<String>("url")
-                Log.d("MainActivity", "analyzeLink called with url: $url")
-                if (url != null) {
-                    coroutineScope.launch {
-                        try {
-                            val idToken = getIdToken()
-                            val response = ApiService(applicationContext).analyzeLink(url, idToken)
-                            result.success(mapOf(
-                                "title" to response.title,
-                                "isClickBait" to response.isClickBait,
-                                "clarityScore" to response.clarityScore,
-                                "answer" to response.answer,
-                                "explanation" to response.explanation,
-                                "summary" to response.summary,
-                                "url" to response.url,
-                                "isVideo" to response.isVideo,
-                                "hashedUrl" to response.hashedUrl,
-                                "analysedAt" to response.analysedAt
-                            ))
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", "Error analyzing link", e)
-                            result.error("UNAVAILABLE", "Link analysis failed.", null)
+            when (call.method) {
+                "analyzeLink" -> {
+                    val url = call.argument<String>("url")
+                    Log.d("MainActivity", "analyzeLink called with url: $url")
+                    if (url != null) {
+                        coroutineScope.launch {
+                            try {
+                                val idToken = getIdToken()
+                                val response = ApiService(applicationContext).analyzeLink(url, idToken)
+                                result.success(mapOf(
+                                    "title" to response.title,
+                                    "isClickBait" to response.isClickBait,
+                                    "clarityScore" to response.clarityScore,
+                                    "answer" to response.answer,
+                                    "explanation" to response.explanation,
+                                    "summary" to response.summary,
+                                    "url" to response.url,
+                                    "isVideo" to response.isVideo,
+                                    "hashedUrl" to response.hashedUrl,
+                                    "analysedAt" to response.analysedAt
+                                ))
+                            } catch (e: Exception) {
+                                Log.e("MainActivity", "Error analyzing link", e)
+                                result.error("UNAVAILABLE", "Link analysis failed.", null)
+                            }
                         }
+                    } else {
+                        result.error("INVALID_ARGUMENT", "URL is required", null)
                     }
-                } else {
-                    result.error("INVALID_ARGUMENT", "URL is required", null)
                 }
-            } else {
-                result.notImplemented()
+                "addNewHistory" -> {
+                    val newHistoryData = call.arguments as Map<String, Any?>
+                    Log.d("MainActivity", "addNewHistory called with data: $newHistoryData")
+                    flutterEngine.dartExecutor.binaryMessenger?.let { messenger ->
+                        MethodChannel(messenger, CHANNEL).invokeMethod("addNewHistory", newHistoryData)
+                    }
+                }
+                else -> result.notImplemented()
             }
         }
     }

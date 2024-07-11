@@ -72,6 +72,21 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   }
 
   void addNewHistory(UserHistoryItem newHistoryItem) {
+    print('################################');
+    print('historyId: ${newHistoryItem.historyId}');
+
+    print('AnalysedLinkResponse:');
+    print('  title: ${newHistoryItem.analysedLink.title}');
+    print('  isClickBait: ${newHistoryItem.analysedLink.isClickBait}');
+    print('  explanation: ${newHistoryItem.analysedLink.explanation}');
+    print('  summary: ${newHistoryItem.analysedLink.summary}');
+    print('  clarityScore: ${newHistoryItem.analysedLink.clarityScore}');
+    print('  url: ${newHistoryItem.analysedLink.url}');
+    print('  isVideo: ${newHistoryItem.analysedLink.isVideo}');
+    print('  answer: ${newHistoryItem.analysedLink.answer}');
+    print('  hashedUrl: ${newHistoryItem.analysedLink.hashedUrl}');
+    print('  analysedAt: ${newHistoryItem.analysedLink.analysedAt}');
+
     state = [newHistoryItem, ...state];
   }
 

@@ -20,6 +20,9 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
@@ -35,14 +38,20 @@ class CustomShareActivity : Activity() {
     private lateinit var summaryTextView: TextView
     private var tooltipWindow: PopupWindow? = null
     private var currentExplanation: String? = null
-
     private val apiService by lazy { ApiService(applicationContext) }
+    private lateinit var flutterEngine: FlutterEngine
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("CustomShareActivity", "onCreate called")
         setupBottomSheetDialog()
         handleIntent(intent)
+
+        // Initialize the FlutterEngine
+        flutterEngine = FlutterEngine(this)
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
     }
 
     private fun setupBottomSheetDialog() {
@@ -108,9 +117,21 @@ class CustomShareActivity : Activity() {
                     val result = apiService.analyzeLink(sharedText, idToken)
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
-
-                    // Send broadcast after updating the history
-                    sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))
+    
+                    // Generate a unique historyId for the item
+                    val historyId = "PLACEHOLDER"
+    
+                    // Structure the data as expected by the Dart side
+                    val dataToSend: Map<String, Any?> = mapOf(
+                        "historyId" to historyId,
+                        "analysedLink" to result.toMap()
+                    )
+    
+                    // Send data to Dart side
+                    val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.clarify.app/api")
+                    methodChannel.invokeMethod("addNewHistory", dataToSend)
+                    Log.d("CustomShareActivity", "Data sent to Dart side: $dataToSend")
+    
                 } catch (e: Exception) {
                     Log.e("CustomShareActivity", "Error analyzing link", e)
                     runOnUiThread { displayError() }
@@ -118,6 +139,7 @@ class CustomShareActivity : Activity() {
             }
         }
     }
+       
 
     private suspend fun getIdToken(): String? = withContext(Dispatchers.IO) {
         val user = FirebaseAuth.getInstance().currentUser

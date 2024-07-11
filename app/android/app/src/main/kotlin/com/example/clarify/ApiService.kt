@@ -79,14 +79,29 @@ class ApiService(private val context: Context) {
 }
 
 data class AnalysedLinkResponse(
-    val title: String,
-    val isClickBait: Boolean,
-    val explanation: String,
-    val summary: String,
-    val clarityScore: Int,
-    val url: String,
-    val isVideo: Boolean,
-    val answer: String,
-    val hashedUrl: String,
-    val analysedAt: String,
-)
+        val title: String,
+        val isClickBait: Boolean,
+        val explanation: String,
+        val summary: String,
+        val clarityScore: Int,
+        val url: String,
+        val isVideo: Boolean,
+        val answer: String,
+        val hashedUrl: String,
+        val analysedAt: String,
+) {
+    fun toMap(): Map<String, Any?> {
+        return mapOf(
+                "title" to title,
+                "isClickBait" to isClickBait,
+                "explanation" to explanation,
+                "summary" to summary,
+                "clarityScore" to clarityScore,
+                "url" to url,
+                "isVideo" to isVideo,
+                "answer" to answer,
+                "hashedUrl" to hashedUrl,
+                "analysedAt" to analysedAt
+        )
+    }
+}

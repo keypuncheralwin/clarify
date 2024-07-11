@@ -10,9 +10,14 @@ class UserHistoryItem {
   });
 
   factory UserHistoryItem.fromJson(Map<String, dynamic> json) {
+    if (json['analysedLink'] == null) {
+      throw Exception("Missing analysedLink in JSON data");
+    }
     return UserHistoryItem(
-      historyId: json['historyId'],
-      analysedLink: AnalysedLinkResponse.fromJson(json['analysedLink']),
+      historyId:
+          json['historyId'] ?? 'unknown', // Default to 'unknown' if missing
+      analysedLink: AnalysedLinkResponse.fromJson(
+          json['analysedLink'] as Map<String, dynamic>),
     );
   }
 
@@ -32,7 +37,7 @@ class UserHistoryResponse {
   factory UserHistoryResponse.fromJson(Map<String, dynamic> json) {
     return UserHistoryResponse(
       userHistory: (json['userHistory'] as List)
-          .map((item) => UserHistoryItem.fromJson(item))
+          .map((item) => UserHistoryItem.fromJson(item as Map<String, dynamic>))
           .toList(),
     );
   }
