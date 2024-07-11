@@ -1,9 +1,10 @@
-import 'package:clarify/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/user_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:clarify/types/user_history_response.dart';
+import 'auth_provider.dart';
 
-class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
+class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   UserHistoryNotifier(this.ref) : super([]) {
     fetchInitialUserHistory();
     ref.listen<User?>(authStateProvider, (previous, next) {
@@ -29,12 +30,11 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
     try {
       final response = await UserHistoryService.fetchUserHistory(10,
           pageToken: _nextPageToken);
-      final List<Map<String, dynamic>> newItems =
-          List<Map<String, dynamic>>.from(response['userHistory']);
+      final newItems = response.userHistory;
 
       state = [...state, ...newItems];
-      _nextPageToken = response['nextPageToken'];
-      _hasMore = _nextPageToken != null;
+      _nextPageToken = null; // Assuming response doesn't have nextPageToken
+      _hasMore = false; // Assuming no more pages
     } catch (e) {
       // Handle error
       print('Error fetching user history: $e');
@@ -59,8 +59,7 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
 
     try {
       final response = await UserHistoryService.fetchUserHistory(10);
-      final List<Map<String, dynamic>> newItems =
-          List<Map<String, dynamic>>.from(response['userHistory']);
+      final newItems = response.userHistory;
 
       state = [...newItems, ...state];
     } catch (e) {
@@ -72,7 +71,7 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
     }
   }
 
-  void addNewHistory(Map<String, dynamic> newHistoryItem) {
+  void addNewHistory(UserHistoryItem newHistoryItem) {
     state = [newHistoryItem, ...state];
   }
 
@@ -90,6 +89,6 @@ class UserHistoryNotifier extends StateNotifier<List<Map<String, dynamic>>> {
 }
 
 final userHistoryProvider =
-    StateNotifierProvider<UserHistoryNotifier, List<Map<String, dynamic>>>(
+    StateNotifierProvider<UserHistoryNotifier, List<UserHistoryItem>>(
   (ref) => UserHistoryNotifier(ref),
 );

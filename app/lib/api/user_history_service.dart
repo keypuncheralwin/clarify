@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import '../types/user_history_response.dart';
 
 class UserHistoryService {
   static final String baseUrl =
       dotenv.env['BASE_URL'] ?? ''; // Replace with your backend URL
 
-  static Future<Map<String, dynamic>> fetchUserHistory(int pageSize,
+  static Future<UserHistoryResponse> fetchUserHistory(int pageSize,
       {String? pageToken, String searchKeyword = ''}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -30,6 +31,6 @@ class UserHistoryService {
 
     final Map<String, dynamic> data = jsonDecode(response.body);
 
-    return data;
+    return UserHistoryResponse.fromJson(data);
   }
 }

@@ -1,5 +1,4 @@
-import 'package:clarify/providers/user_history_notifier.dart';
-import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
+import 'package:clarify/types/user_history_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/screens/home_screen.dart';
@@ -10,6 +9,9 @@ import 'package:clarify/api/analyse_link.dart';
 import 'package:clarify/utils/url_validator.dart';
 import 'package:flutter/services.dart';
 import 'package:clarify/providers/auth_provider.dart';
+import 'package:clarify/providers/user_history_notifier.dart';
+import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
+import 'package:clarify/types/analysed_link_response.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -20,7 +22,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
-  Map<String, dynamic>? _result;
+  AnalysedLinkResponse? _result;
   bool _isLoading = false;
   String? _errorMessage;
   final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey =
@@ -61,9 +63,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       });
 
       if (result != null) {
-        final historyItem = {
-          'analysedLink': result,
-        };
+        final historyItem = UserHistoryItem(
+          historyId: 'PLACEHOLDER',
+          analysedLink: result,
+        );
         ref.read(userHistoryProvider.notifier).addNewHistory(historyItem);
       }
     } else {
