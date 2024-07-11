@@ -48,10 +48,9 @@ export async function fetchUserHistory(
       const analysedLinkData = analysedLinkDoc.data() as AnalysedLinkResponse;
 
       if (analysedLinkData.title.includes(searchKeyword)) {
+        analysedLinkData.analysedAt = historyData.analysedAt;
         userHistoryData.push({
           historyId: doc.id,
-          analysedAt: historyData.analysedAt,
-          hashedUrl: historyData.hashedUrl,
           analysedLink: analysedLinkData,
         });
       }
