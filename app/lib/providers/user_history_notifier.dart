@@ -33,8 +33,9 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       final newItems = response.userHistory;
 
       state = [...state, ...newItems];
-      _nextPageToken = null; // Assuming response doesn't have nextPageToken
-      _hasMore = false; // Assuming no more pages
+      _nextPageToken = response.nextPageToken; // Set the next page token
+      _hasMore =
+          response.nextPageToken != null; // Determine if there are more pages
     } catch (e) {
       // Handle error
       print('Error fetching user history: $e');
@@ -46,6 +47,8 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   Future<void> fetchInitialUserHistory() async {
     isInitialLoading = true;
     state = [];
+    _nextPageToken = null; // Reset next page token
+    _hasMore = true; // Reset hasMore
     await fetchUserHistory();
     isInitialLoading = false;
     state = [...state]; // Trigger state change to update the UI
@@ -61,6 +64,9 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       final newItems = response.userHistory;
 
       state = newItems; // Replace existing state with new items
+      _nextPageToken = response.nextPageToken; // Reset the next page token
+      _hasMore =
+          response.nextPageToken != null; // Determine if there are more pages
     } catch (e) {
       // Handle error
       print('Error refreshing user history: $e');
