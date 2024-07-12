@@ -61,7 +61,7 @@ class MainActivity : FlutterActivity() {
                                 "isAlreadyInHistory" to response.isAlreadyInHistory
                             ))
                         } catch (e: Exception) {
-                            Log.e("MainActivity", "Error analyzing link", e)
+                            Log.e("MainActivity", "Error analysing link", e)
                             result.error("UNAVAILABLE", "Link analysis failed.", null)
                         }
                     }

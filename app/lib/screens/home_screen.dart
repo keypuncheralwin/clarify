@@ -52,7 +52,9 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
               : RefreshIndicator(
                   key: _refreshIndicatorKey,
                   onRefresh: _refresh,
-                  child: _buildUserHistory(userHistory, isLoadingMore),
+                  child: userHistory.isEmpty
+                      ? _buildUserWelcomeMessage(user.displayName)
+                      : _buildUserHistory(userHistory, isLoadingMore),
                 ),
     );
   }
@@ -71,6 +73,30 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             SizedBox(height: 20),
             Text(
+              "Get started by sharing a link to the Clarify app or paste a link here by tapping the link button below",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserWelcomeMessage(String? userName) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Welcome to Clarify, ${userName ?? 'User'}!',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            const Text(
               "Get started by sharing a link to the Clarify app or paste a link here by tapping the link button below",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey),
