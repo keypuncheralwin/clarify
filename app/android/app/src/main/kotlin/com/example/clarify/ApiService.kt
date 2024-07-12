@@ -57,6 +57,7 @@ class ApiService(private val context: Context) {
             isVideo = jsonResponse.getBoolean("isVideo"),
             hashedUrl = jsonResponse.getString("hashedUrl"),
             analysedAt = jsonResponse.getString("analysedAt"),
+            isAlreadyInHistory = jsonResponse.optBoolean("isAlreadyInHistory", false) // New optional attribute
         )
     }
 
@@ -89,4 +90,5 @@ data class AnalysedLinkResponse(
     val answer: String,
     val hashedUrl: String,
     val analysedAt: String,
+    val isAlreadyInHistory: Boolean? = null 
 )

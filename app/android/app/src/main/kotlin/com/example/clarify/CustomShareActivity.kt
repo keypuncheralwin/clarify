@@ -22,6 +22,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+import org.json.JSONArray
+import org.json.JSONObject
 
 class CustomShareActivity : Activity() {
 
@@ -47,44 +49,44 @@ class CustomShareActivity : Activity() {
 
     private fun setupBottomSheetDialog() {
         Log.d("CustomShareActivity", "Setting up bottom sheet dialog")
-    
+
         val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", true)
         Log.d("CustomShareActivity", "setupBottomSheetDialog isDarkMode: $isDarkMode")
-    
+
         val (themeMode, layoutRes, themeResId) = if (isDarkMode) {
             Triple(AppCompatDelegate.MODE_NIGHT_YES, R.layout.bottom_sheet_layout_night, R.style.DarkBottomSheetDialog)
         } else {
             Triple(AppCompatDelegate.MODE_NIGHT_NO, R.layout.bottom_sheet_layout, R.style.LightBottomSheetDialog)
         }
-    
+
         AppCompatDelegate.setDefaultNightMode(themeMode)
         Log.d("CustomShareActivity", "AppCompatDelegate.setDefaultNightMode applied")
-    
+
         val bottomSheetView = LayoutInflater.from(this).inflate(layoutRes, null)
         bottomSheetDialog = BottomSheetDialog(this, themeResId)
         bottomSheetDialog.setContentView(bottomSheetView)
-    
+
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
-    
+
         bottomSheetDialog.setOnDismissListener {
             Log.d("CustomShareActivity", "Bottom sheet dismissed")
             finish()
         }
-    
+
         shimmerTitle = bottomSheetView.findViewById(R.id.shimmerTitle)
         shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
-    
+
         bottomSheetView.setOnClickListener {
             hideTooltip()
         }
-    
+
         clarityScoreTextView.setOnClickListener {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
         }
@@ -106,6 +108,9 @@ class CustomShareActivity : Activity() {
                 try {
                     val idToken = getIdToken()
                     val result = apiService.analyzeLink(sharedText, idToken)
+                    if (result.isAlreadyInHistory != true) {
+                        saveHistoryItem(result)
+                    }
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
@@ -119,6 +124,42 @@ class CustomShareActivity : Activity() {
     private suspend fun getIdToken(): String? = withContext(Dispatchers.IO) {
         val user = FirebaseAuth.getInstance().currentUser
         user?.getIdToken(false)?.await()?.token
+    }
+
+    private fun saveHistoryItem(result: AnalysedLinkResponse) {
+        
+        val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPrefs.edit()
+        val historyJson = sharedPrefs.getString("flutter.localUserHistory", "[]")
+        val historyArray = JSONArray(historyJson)
+
+        // Create a UserHistoryItem object and convert it to JSON
+        val newHistoryItem = JSONObject().apply {
+            put("historyId", generateHistoryId()) // Generate a unique ID for the history item
+            put("analysedLink", JSONObject().apply {
+                put("title", result.title)
+                put("isClickBait", result.isClickBait)
+                put("explanation", result.explanation)
+                put("summary", result.summary)
+                put("clarityScore", result.clarityScore)
+                put("url", result.url)
+                put("isVideo", result.isVideo)
+                put("answer", result.answer)
+                put("hashedUrl", result.hashedUrl)
+                put("analysedAt", result.analysedAt)
+                put("isAlreadyInHistory", result.isAlreadyInHistory)
+            })
+        }
+
+        historyArray.put(newHistoryItem)
+        editor.putString("flutter.localUserHistory", historyArray.toString())
+        editor.apply()
+        Log.d("CustomShareActivity", "SAVED THE LOCAL HISTORY: ${historyArray.toString()}")
+    }
+
+    private fun generateHistoryId(): String {
+        // Generate a unique ID for the history item
+        return System.currentTimeMillis().toString()
     }
 
     private fun displayResult(result: AnalysedLinkResponse) {

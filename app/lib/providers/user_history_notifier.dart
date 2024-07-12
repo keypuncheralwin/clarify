@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/user_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:clarify/types/user_history_response.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'auth_provider.dart';
 
 class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
@@ -31,7 +34,6 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       final response = await UserHistoryService.fetchUserHistory(10,
           pageToken: _nextPageToken);
       final newItems = response.userHistory;
-
       state = [...state, ...newItems];
       _nextPageToken = null; // Assuming response doesn't have nextPageToken
       _hasMore = false; // Assuming no more pages
@@ -59,7 +61,6 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
     try {
       final response = await UserHistoryService.fetchUserHistory(10);
       final newItems = response.userHistory;
-
       state = [...newItems, ...state];
     } catch (e) {
       // Handle error
@@ -71,7 +72,50 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   }
 
   void addNewHistory(UserHistoryItem newHistoryItem) {
-    state = [newHistoryItem, ...state];
+    if (newHistoryItem.analysedLink.isAlreadyInHistory != true) {
+      state = [newHistoryItem, ...state];
+    }
+  }
+
+  Future<void> updateHistoryFromLocal() async {
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Set<String> keys = prefs.getKeys();
+
+    // if (keys.isEmpty) {
+    //   print("********************************");
+    //   return;
+    // }
+
+    // print("Shared Preferences:");
+    // final historyJson = prefs.getString('localUserHistory');
+    // print("historyJson");
+    // print(historyJson);
+    // print("###########################################");
+    // for (String key in keys) {
+    //   var value = prefs.get(key);
+    //   print("$key: $value");
+    // }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final historyJson = prefs.getString('localUserHistory') ?? '[]';
+      debugPrint('Local history JSON: $historyJson');
+      final List<dynamic> historyList = json.decode(historyJson);
+
+      if (historyList.isNotEmpty) {
+        final List<UserHistoryItem> newItems = historyList.map((item) {
+          return UserHistoryItem.fromJson(item as Map<String, dynamic>);
+        }).toList();
+
+        state = [...newItems, ...state];
+        debugPrint('New items added to history: ${newItems.length}');
+      }
+
+      await prefs
+          .remove('flutter.localUserHistory'); // Clear the shared preferences
+      debugPrint('Local history cleared');
+    } catch (e) {
+      debugPrint('Error in updateHistoryFromLocal: $e');
+    }
   }
 
   Future<void> fetchMoreHistory() async {
