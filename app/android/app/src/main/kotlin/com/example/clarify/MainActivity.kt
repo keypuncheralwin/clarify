@@ -1,35 +1,47 @@
 package com.example.clarify
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : FlutterActivity() {
-    private val channel = "com.clarify.app/api"
+    private val CHANNEL = "com.clarify.app/api"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()  
+        auth = FirebaseAuth.getInstance()  // Initialize Firebase Auth
+
+        // Register broadcast receiver
+        val filter = IntentFilter("com.clarify.app.ACTION_HISTORY_UPDATED")
+        registerReceiver(historyUpdateReceiver, filter, Context.RECEIVER_EXPORTED)
+    }
+
+    private val historyUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                MethodChannel(messenger, CHANNEL).invokeMethod("historyUpdated", null)
+            }
+        }
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channel).setMethodCallHandler { call, result ->
-            if (call.method == "analyseLink") {
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "analyzeLink") {
                 val url = call.argument<String>("url")
-                Log.d("MainActivity", "analyseLink called with url: $url")
+                Log.d("MainActivity", "analyzeLink called with url: $url")
                 if (url != null) {
                     coroutineScope.launch {
                         try {
@@ -74,12 +86,13 @@ class MainActivity : FlutterActivity() {
                 }
             }
         } else {
-            cont.resume(null)
+            cont.resume(null)  // User is not signed in
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
+        unregisterReceiver(historyUpdateReceiver) // Unregister receiver to avoid memory leaks
     }
 }

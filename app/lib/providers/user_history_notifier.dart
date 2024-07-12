@@ -60,7 +60,7 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       final response = await UserHistoryService.fetchUserHistory(10);
       final newItems = response.userHistory;
 
-      state = [...newItems, ...state];
+      state = newItems; // Replace existing state with new items
     } catch (e) {
       // Handle error
       print('Error refreshing user history: $e');
