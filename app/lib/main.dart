@@ -1,4 +1,4 @@
-import 'package:clarify/providers/user_history_notifier.dart';
+import 'package:clarify/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -42,6 +42,9 @@ class ClarifyApp extends ConsumerStatefulWidget {
 
 class _ClarifyAppState extends ConsumerState<ClarifyApp>
     with WidgetsBindingObserver {
+  final GlobalKey<HomeScreenState> _homeScreenKey =
+      GlobalKey<HomeScreenState>(); // Add a global key for HomeScreen
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +65,7 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
     debugPrint('AppLifecycleState changed: $state');
     if (state == AppLifecycleState.resumed) {
       debugPrint('APP RESUMED');
+      _homeScreenKey.currentState?.triggerRefresh(); // Trigger the refresh
     }
   }
 
@@ -70,7 +74,8 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
     return MaterialApp(
       title: 'Clarify',
       theme: ref.watch(themeProvider),
-      home: const MainScreen(),
+      home: MainScreen(
+          homeScreenKey: _homeScreenKey), // Pass the key to MainScreen
     );
   }
 }

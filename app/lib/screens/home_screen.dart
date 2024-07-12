@@ -1,23 +1,25 @@
+import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/providers/user_history_notifier.dart';
 import 'package:clarify/types/analysed_link_response.dart';
+import 'package:clarify/types/user_history_response.dart';
+import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
+import 'package:clarify/widgets/clarity_score_pill.dart';
 import 'package:clarify/widgets/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:clarify/providers/auth_provider.dart';
-import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
-import 'package:clarify/widgets/clarity_score_pill.dart';
 import 'package:intl/intl.dart';
-import 'package:clarify/types/user_history_response.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -28,10 +30,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.read(userHistoryProvider.notifier).fetchMoreHistory();
       }
     });
+  }
 
-    // Log initial state
-    final userHistory = ref.read(userHistoryProvider);
-    debugPrint('Initial user history length: ${userHistory.length}');
+  Future<void> _refresh() async {
+    await ref.read(userHistoryProvider.notifier).refreshHistory();
   }
 
   @override
@@ -42,17 +44,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isLoadingMore = userHistoryNotifier.isLoadingMore;
     final isInitialLoading = userHistoryNotifier.isInitialLoading;
 
-    // Log user history length
-    debugPrint('User history length: ${userHistory.length}');
-
     return Scaffold(
       body: user == null
           ? _buildWelcomeMessage()
           : isInitialLoading
               ? _buildInitialLoadingSkeleton()
               : RefreshIndicator(
-                  onRefresh: () =>
-                      ref.read(userHistoryProvider.notifier).refreshHistory(),
+                  key: _refreshIndicatorKey,
+                  onRefresh: _refresh,
                   child: _buildUserHistory(userHistory, isLoadingMore),
                 ),
     );
@@ -152,5 +151,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
     );
+  }
+
+  // Add a public method to trigger the refresh indicator programmatically
+  void triggerRefresh() {
+    _refreshIndicatorKey.currentState?.show();
   }
 }
