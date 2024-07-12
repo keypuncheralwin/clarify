@@ -15,6 +15,7 @@ export type ProcessedAIResponse = AIResponse & {
 export interface AnalysedLinkResponse extends ProcessedAIResponse {
   hashedUrl: string;
   analysedAt: string;
+  isAlreadyInHistory?: boolean;
 }
 
 export interface UserHistoryItem {

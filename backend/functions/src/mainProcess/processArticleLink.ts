@@ -38,7 +38,14 @@ async function processArticleLink(
   );
 
   if (alreadyAnalysed) {
-    saveUrlToUserHistory(hashedUrl, db, userUuid);
+    if (userUuid) {
+      const isAlreadyInHistory = await saveUrlToUserHistory(
+        hashedUrl,
+        db,
+        userUuid
+      );
+      alreadyAnalysed.isAlreadyInHistory = isAlreadyInHistory;
+    }
     res.json({ response: alreadyAnalysed });
     return;
   }
@@ -87,7 +94,9 @@ async function processArticleLink(
         db,
         processedAIResponse
       );
-      await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      if (userUuid) {
+        await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      }
       logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
       res.json({ response: analysedLink });
     } else {

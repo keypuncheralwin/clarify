@@ -48,6 +48,8 @@ export async function fetchUserHistory(
       const analysedLinkData = analysedLinkDoc.data() as AnalysedLinkResponse;
 
       if (analysedLinkData.title.includes(searchKeyword)) {
+        // Updating the lastAnalysed time to be when the user Analysed it and not when the link was first
+        // analysed
         analysedLinkData.analysedAt = historyData.analysedAt;
         userHistoryData.push({
           historyId: doc.id,

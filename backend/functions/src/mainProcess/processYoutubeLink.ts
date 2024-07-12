@@ -59,7 +59,14 @@ async function processYouTubeLink(
   );
 
   if (alreadyAnalysed) {
-    saveUrlToUserHistory(hashedUrl, db, userUuid);
+    if (userUuid) {
+      const isAlreadyInHistory = await saveUrlToUserHistory(
+        hashedUrl,
+        db,
+        userUuid
+      );
+      alreadyAnalysed.isAlreadyInHistory = isAlreadyInHistory;
+    }
     res.json({ response: alreadyAnalysed });
     return;
   }
@@ -127,7 +134,9 @@ async function processYouTubeLink(
         db,
         processedAIResponse
       );
-      await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      if (userUuid) {
+        await saveUrlToUserHistory(hashedUrl, db, userUuid);
+      }
       logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
       res.json({ Response: analysedLink });
     } else {
