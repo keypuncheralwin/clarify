@@ -138,7 +138,7 @@ async function processYouTubeLink(
         await saveUrlToUserHistory(hashedUrl, db, userUuid);
       }
       logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
-      res.json({ Response: analysedLink });
+      res.json({ response: analysedLink });
     } else {
       logger.error('No response received from the AI chat session');
       saveFailedToAnalyseLink(url, hashedUrl, db);
