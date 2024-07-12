@@ -6,6 +6,7 @@ import { containsValidYoutubeUrl } from '../utils/youtubeValidation';
 import logger from '../logger/logger';
 import { specialCasesCheck } from '../utils/specialCaseUrlChecks';
 import { verifyUserOrDevice } from '../middleware/authMiddleware';
+import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.post(
       } else {
         const validUrl = await extractValidUrl(url);
         if (!validUrl) {
+          saveFailedToAnalyseLink(url, 'Invalid URL');
           res.status(400).send('Invalid URL');
           return;
         }

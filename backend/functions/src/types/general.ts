@@ -33,4 +33,5 @@ export interface FailedToAnalyseResponse {
   visitCount: number;
   firstAttemptedAt: string;
   lastAttemptedAt: string;
+  reason: string;
 }

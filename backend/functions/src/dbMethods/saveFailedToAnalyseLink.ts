@@ -1,12 +1,15 @@
 import { firestore } from 'firebase-admin';
 import logger from '../logger/logger';
 import { FailedToAnalyseResponse } from '../types/general';
+import { hashUrl } from '../utils/general';
 
 export async function saveFailedToAnalyseLink(
   url: string,
-  hashedUrl: string,
-  db: firestore.Firestore
+  reason: string
 ): Promise<void> {
+  const db = firestore();
+  const hashedUrl = hashUrl(url);
+
   const timeStamp = new Date().toISOString(); // Store in ISO format (UTC)
 
   const urlRef = db.collection('FailedToAnalyse').doc(hashedUrl);
@@ -28,6 +31,7 @@ export async function saveFailedToAnalyseLink(
           visitCount: 1,
           firstAttemptedAt: timeStamp,
           lastAttemptedAt: timeStamp,
+          reason,
         };
         transaction.set(urlRef, failedToAnalyse);
       }

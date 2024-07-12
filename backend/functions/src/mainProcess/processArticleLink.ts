@@ -59,7 +59,7 @@ async function processArticleLink(
 
   const article = await fetchArticle(validUrl);
   if (!article) {
-    saveFailedToAnalyseLink(validUrl, hashedUrl, db);
+    saveFailedToAnalyseLink(validUrl, 'Not able to find article');
     res.status(400).send('Invalid URL');
     return;
   }
@@ -101,13 +101,19 @@ async function processArticleLink(
       res.json({ response: analysedLink });
     } else {
       logger.error('No response received from the AI chat sesssion');
-      saveFailedToAnalyseLink(validUrl, hashedUrl, db);
+      saveFailedToAnalyseLink(
+        validUrl,
+        'No response received from the AI chat sesssion'
+      );
       res.status(500).send('Internal Server Error');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     logger.error(`Error processing article: ${error?.message}`, error);
-    saveFailedToAnalyseLink(validUrl, hashedUrl, db);
+    saveFailedToAnalyseLink(
+      validUrl,
+      `Error processing article: ${error?.message}`
+    );
     res.status(500).send('Internal Server Error');
   }
 }
