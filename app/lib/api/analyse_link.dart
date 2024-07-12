@@ -4,10 +4,10 @@ import '../types/analysed_link_response.dart';
 class ApiService {
   static const platform = MethodChannel('com.clarify.app/api');
 
-  static Future<AnalysedLinkResponse?> analyzeLink(String url) async {
+  static Future<AnalysedLinkResponse?> analyseLink(String url) async {
     try {
       final result = await platform
-          .invokeMethod<Map<dynamic, dynamic>>('analyzeLink', {'url': url});
+          .invokeMethod<Map<dynamic, dynamic>>('analyseLink', {'url': url});
       return result != null
           ? AnalysedLinkResponse.fromJson(Map<String, dynamic>.from(result))
           : null;

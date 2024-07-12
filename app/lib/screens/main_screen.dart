@@ -42,7 +42,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
-  Future<void> _analyzeLink() async {
+  Future<void> _analyseLink() async {
     setState(() {
       _isLoading = true;
       _result = null; // Clear previous result
@@ -54,7 +54,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     if (url != null && url.isNotEmpty && isValidUrl(url)) {
       _showBottomSheet();
-      final result = await ApiService.analyzeLink(url);
+      final result = await ApiService.analyseLink(url);
       setState(() {
         _result = result;
         _isLoading = false;
@@ -123,7 +123,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ),
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton(
-              onPressed: _analyzeLink,
+              onPressed: _analyseLink,
               backgroundColor: Colors.deepPurple,
               child: Transform.rotate(
                 angle: -0.785398, // -45 degrees in radians

@@ -20,7 +20,7 @@ class ApiService(private val context: Context) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    suspend fun analyzeLink(link: String, idToken: String?): AnalysedLinkResponse = withContext(Dispatchers.IO) {
+    suspend fun analyseLink(link: String, idToken: String?): AnalysedLinkResponse = withContext(Dispatchers.IO) {
         val url = readConfig()
         val deviceId = getDeviceId() ?: "NO_DEVICE_ID"
         val json = JSONObject().apply {
@@ -57,7 +57,7 @@ class ApiService(private val context: Context) {
             isVideo = jsonResponse.getBoolean("isVideo"),
             hashedUrl = jsonResponse.getString("hashedUrl"),
             analysedAt = jsonResponse.getString("analysedAt"),
-            isAlreadyInHistory = jsonResponse.optBoolean("isAlreadyInHistory", false) // New optional attribute
+            isAlreadyInHistory = jsonResponse.optBoolean("isAlreadyInHistory", false) 
         )
     }
 

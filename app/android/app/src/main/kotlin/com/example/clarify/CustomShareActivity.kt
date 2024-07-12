@@ -22,9 +22,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-import org.json.JSONArray
-import org.json.JSONObject
-
 class CustomShareActivity : Activity() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -107,10 +104,7 @@ class CustomShareActivity : Activity() {
             coroutineScope.launch {
                 try {
                     val idToken = getIdToken()
-                    val result = apiService.analyzeLink(sharedText, idToken)
-                    if (result.isAlreadyInHistory != true) {
-                        saveHistoryItem(result)
-                    }
+                    val result = apiService.analyseLink(sharedText, idToken)
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
@@ -126,42 +120,6 @@ class CustomShareActivity : Activity() {
         user?.getIdToken(false)?.await()?.token
     }
 
-    private fun saveHistoryItem(result: AnalysedLinkResponse) {
-        
-        val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val editor = sharedPrefs.edit()
-        val historyJson = sharedPrefs.getString("flutter.localUserHistory", "[]")
-        val historyArray = JSONArray(historyJson)
-
-        // Create a UserHistoryItem object and convert it to JSON
-        val newHistoryItem = JSONObject().apply {
-            put("historyId", generateHistoryId()) // Generate a unique ID for the history item
-            put("analysedLink", JSONObject().apply {
-                put("title", result.title)
-                put("isClickBait", result.isClickBait)
-                put("explanation", result.explanation)
-                put("summary", result.summary)
-                put("clarityScore", result.clarityScore)
-                put("url", result.url)
-                put("isVideo", result.isVideo)
-                put("answer", result.answer)
-                put("hashedUrl", result.hashedUrl)
-                put("analysedAt", result.analysedAt)
-                put("isAlreadyInHistory", result.isAlreadyInHistory)
-            })
-        }
-
-        historyArray.put(newHistoryItem)
-        editor.putString("flutter.localUserHistory", historyArray.toString())
-        editor.apply()
-        Log.d("CustomShareActivity", "SAVED THE LOCAL HISTORY: ${historyArray.toString()}")
-    }
-
-    private fun generateHistoryId(): String {
-        // Generate a unique ID for the history item
-        return System.currentTimeMillis().toString()
-    }
-
     private fun displayResult(result: AnalysedLinkResponse) {
         shimmerTitle.stopShimmer()
         shimmerTitle.visibility = View.GONE
@@ -170,7 +128,7 @@ class CustomShareActivity : Activity() {
 
         clarityScoreTextView.visibility = View.VISIBLE
         titleTextView.visibility = View.VISIBLE
-        clickbaitTextView.visibility = if (result.answer.isNullOrBlank()) View.GONE else View.VISIBLE
+        clickbaitTextView.visibility = if (result.answer.isBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 
         clarityScoreTextView.text = "Clarity Score: ${result.clarityScore}"
@@ -197,7 +155,7 @@ class CustomShareActivity : Activity() {
         shimmerContent.visibility = View.GONE
 
         titleTextView.visibility = View.VISIBLE
-        titleTextView.text = "Failed to analyze link"
+        titleTextView.text = "Failed to analyse link"
     }
 
     private fun showTooltip(explanation: String, anchor: View) {
