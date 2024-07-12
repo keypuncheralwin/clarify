@@ -62,18 +62,6 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
     debugPrint('AppLifecycleState changed: $state');
     if (state == AppLifecycleState.resumed) {
       debugPrint('APP RESUMED');
-      _updateHistoryFromLocal();
-    }
-  }
-
-  Future<void> _updateHistoryFromLocal() async {
-    try {
-      debugPrint('CALLING _updateHistoryFromLocal');
-      final userHistoryNotifier = ref.read(userHistoryProvider.notifier);
-      await userHistoryNotifier.updateHistoryFromLocal();
-      debugPrint('Updated history from local storage');
-    } catch (e) {
-      debugPrint('Error updating history from local storage: $e');
     }
   }
 

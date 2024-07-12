@@ -24,11 +24,11 @@ export async function saveUrlToUserHistory(
         });
 
         logger.info('URL added to user history successfully');
-        return true;
+        return false;
       }
 
       logger.info('URL already exists in user history');
-      return false;
+      return true;
     });
     return result;
   } catch (error) {
