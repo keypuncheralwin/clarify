@@ -28,6 +28,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.read(userHistoryProvider.notifier).fetchMoreHistory();
       }
     });
+
+    // Log initial state
+    final userHistory = ref.read(userHistoryProvider);
+    debugPrint('Initial user history length: ${userHistory.length}');
   }
 
   @override
@@ -37,6 +41,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final userHistoryNotifier = ref.read(userHistoryProvider.notifier);
     final isLoadingMore = userHistoryNotifier.isLoadingMore;
     final isInitialLoading = userHistoryNotifier.isInitialLoading;
+
+    // Log user history length
+    debugPrint('User history length: ${userHistory.length}');
 
     return Scaffold(
       body: user == null

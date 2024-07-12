@@ -71,7 +71,9 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   }
 
   void addNewHistory(UserHistoryItem newHistoryItem) {
-    state = [newHistoryItem, ...state];
+    if (newHistoryItem.analysedLink.isAlreadyInHistory != true) {
+      state = [newHistoryItem, ...state];
+    }
   }
 
   Future<void> fetchMoreHistory() async {

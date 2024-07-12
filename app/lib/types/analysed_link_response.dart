@@ -9,6 +9,7 @@ class AnalysedLinkResponse {
   final String answer;
   final String hashedUrl;
   final String analysedAt;
+  final bool? isAlreadyInHistory;
 
   AnalysedLinkResponse({
     required this.title,
@@ -21,6 +22,7 @@ class AnalysedLinkResponse {
     required this.answer,
     required this.hashedUrl,
     required this.analysedAt,
+    this.isAlreadyInHistory,
   });
 
   factory AnalysedLinkResponse.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class AnalysedLinkResponse {
       answer: json['answer'],
       hashedUrl: json['hashedUrl'],
       analysedAt: json['analysedAt'],
+      isAlreadyInHistory: json['isAlreadyInHistory'],
     );
   }
 
@@ -50,6 +53,7 @@ class AnalysedLinkResponse {
       'answer': answer,
       'hashedUrl': hashedUrl,
       'analysedAt': analysedAt,
+      'isAlreadyInHistory': isAlreadyInHistory,
     };
   }
 }

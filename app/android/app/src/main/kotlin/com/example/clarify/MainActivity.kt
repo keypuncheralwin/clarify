@@ -1,39 +1,40 @@
 package com.example.clarify
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import androidx.annotation.NonNull
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.*
-import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.clarify.app/api"
+    private val channel = "com.clarify.app/api"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()  // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()  
     }
 
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "analyzeLink") {
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channel).setMethodCallHandler { call, result ->
+            if (call.method == "analyseLink") {
                 val url = call.argument<String>("url")
-                Log.d("MainActivity", "analyzeLink called with url: $url")
+                Log.d("MainActivity", "analyseLink called with url: $url")
                 if (url != null) {
                     coroutineScope.launch {
                         try {
                             val idToken = getIdToken()
-                            val response = ApiService(applicationContext).analyzeLink(url, idToken)
+                            val response = ApiService(applicationContext).analyseLink(url, idToken)
                             result.success(mapOf(
                                 "title" to response.title,
                                 "isClickBait" to response.isClickBait,
@@ -44,7 +45,8 @@ class MainActivity : FlutterActivity() {
                                 "url" to response.url,
                                 "isVideo" to response.isVideo,
                                 "hashedUrl" to response.hashedUrl,
-                                "analysedAt" to response.analysedAt
+                                "analysedAt" to response.analysedAt,
+                                "isAlreadyInHistory" to response.isAlreadyInHistory
                             ))
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error analyzing link", e)
@@ -72,7 +74,7 @@ class MainActivity : FlutterActivity() {
                 }
             }
         } else {
-            cont.resume(null)  // User is not signed in
+            cont.resume(null)
         }
     }
 

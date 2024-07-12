@@ -22,7 +22,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
-
 class CustomShareActivity : Activity() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -47,44 +46,44 @@ class CustomShareActivity : Activity() {
 
     private fun setupBottomSheetDialog() {
         Log.d("CustomShareActivity", "Setting up bottom sheet dialog")
-    
+
         val sharedPrefs = getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val isDarkMode = sharedPrefs.getBoolean("flutter.isDarkMode", true)
         Log.d("CustomShareActivity", "setupBottomSheetDialog isDarkMode: $isDarkMode")
-    
+
         val (themeMode, layoutRes, themeResId) = if (isDarkMode) {
             Triple(AppCompatDelegate.MODE_NIGHT_YES, R.layout.bottom_sheet_layout_night, R.style.DarkBottomSheetDialog)
         } else {
             Triple(AppCompatDelegate.MODE_NIGHT_NO, R.layout.bottom_sheet_layout, R.style.LightBottomSheetDialog)
         }
-    
+
         AppCompatDelegate.setDefaultNightMode(themeMode)
         Log.d("CustomShareActivity", "AppCompatDelegate.setDefaultNightMode applied")
-    
+
         val bottomSheetView = LayoutInflater.from(this).inflate(layoutRes, null)
         bottomSheetDialog = BottomSheetDialog(this, themeResId)
         bottomSheetDialog.setContentView(bottomSheetView)
-    
+
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView.parent as View)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
-    
+
         bottomSheetDialog.setOnDismissListener {
             Log.d("CustomShareActivity", "Bottom sheet dismissed")
             finish()
         }
-    
+
         shimmerTitle = bottomSheetView.findViewById(R.id.shimmerTitle)
         shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
-    
+
         bottomSheetView.setOnClickListener {
             hideTooltip()
         }
-    
+
         clarityScoreTextView.setOnClickListener {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
         }
@@ -105,7 +104,7 @@ class CustomShareActivity : Activity() {
             coroutineScope.launch {
                 try {
                     val idToken = getIdToken()
-                    val result = apiService.analyzeLink(sharedText, idToken)
+                    val result = apiService.analyseLink(sharedText, idToken)
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
@@ -129,7 +128,7 @@ class CustomShareActivity : Activity() {
 
         clarityScoreTextView.visibility = View.VISIBLE
         titleTextView.visibility = View.VISIBLE
-        clickbaitTextView.visibility = if (result.answer.isNullOrBlank()) View.GONE else View.VISIBLE
+        clickbaitTextView.visibility = if (result.answer.isBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 
         clarityScoreTextView.text = "Clarity Score: ${result.clarityScore}"
@@ -156,7 +155,7 @@ class CustomShareActivity : Activity() {
         shimmerContent.visibility = View.GONE
 
         titleTextView.visibility = View.VISIBLE
-        titleTextView.text = "Failed to analyze link"
+        titleTextView.text = "Failed to analyse link"
     }
 
     private fun showTooltip(explanation: String, anchor: View) {

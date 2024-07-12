@@ -30,6 +30,7 @@ export async function getAnalysedLinkIfExists(
         const userHistoryDoc = historySnapshot.docs[0];
         const analysedAt = userHistoryDoc.get('analysedAt');
         analysedLinkResponse.analysedAt = analysedAt;
+        analysedLinkResponse.isAlreadyInHistory = false;
       }
     }
 
