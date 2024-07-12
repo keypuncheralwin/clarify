@@ -1,4 +1,5 @@
 import 'package:clarify/providers/user_history_notifier.dart';
+import 'package:clarify/types/analysed_link_response.dart';
 import 'package:clarify/widgets/shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
 import 'package:clarify/widgets/clarity_score_pill.dart';
 import 'package:intl/intl.dart';
+import 'package:clarify/types/user_history_response.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -83,7 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildUserHistory(
-      List<Map<String, dynamic>> userHistory, bool isLoadingMore) {
+      List<UserHistoryItem> userHistory, bool isLoadingMore) {
     return ListView.builder(
       controller: _scrollController,
       itemCount: userHistory.length +
@@ -94,27 +96,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
 
         final item = userHistory[index];
-        final analysedAt = DateFormat.yMMMd().add_jm().format(
-            DateTime.parse(item['analysedLink']['analysedAt']).toLocal());
+        final analysedAt = DateFormat.yMMMd()
+            .add_jm()
+            .format(DateTime.parse(item.analysedLink.analysedAt).toLocal());
 
         return Column(
           children: [
             InkWell(
               onTap: () {
-                _showBottomSheet(item);
+                _showBottomSheet(item.analysedLink);
               },
               child: ListTile(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 title: Text(
-                  item['analysedLink']['title'],
+                  item.analysedLink.title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClarityScorePill(
-                        clarityScore: item['analysedLink']['clarityScore']),
+                        clarityScore: item.analysedLink.clarityScore),
                     const SizedBox(height: 4),
                     Text('Analysed At: $analysedAt'),
                   ],
@@ -130,14 +133,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showBottomSheet(Map<String, dynamic> item) {
+  void _showBottomSheet(AnalysedLinkResponse analysedLink) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return AnalysedLinkBottomSheet(
           isLoading: false,
-          result: item['analysedLink'],
+          result: analysedLink,
           errorMessage: null,
         );
       },

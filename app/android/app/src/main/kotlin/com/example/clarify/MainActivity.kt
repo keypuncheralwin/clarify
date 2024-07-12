@@ -1,9 +1,7 @@
 package com.example.clarify
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -23,18 +21,6 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()  // Initialize Firebase Auth
-
-        // Register broadcast receiver
-        val filter = IntentFilter("com.clarify.app.ACTION_HISTORY_UPDATED")
-        registerReceiver(historyUpdateReceiver, filter, Context.RECEIVER_EXPORTED)
-    }
-
-    private val historyUpdateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
-                MethodChannel(messenger, CHANNEL).invokeMethod("historyUpdated", null)
-            }
-        }
     }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -93,6 +79,5 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
-        unregisterReceiver(historyUpdateReceiver) // Unregister receiver to avoid memory leaks
     }
 }

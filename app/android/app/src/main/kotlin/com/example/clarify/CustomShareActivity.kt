@@ -108,9 +108,6 @@ class CustomShareActivity : Activity() {
                     val result = apiService.analyzeLink(sharedText, idToken)
                     currentExplanation = result.explanation
                     runOnUiThread { displayResult(result) }
-
-                    // Send broadcast after updating the history
-                    sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))
                 } catch (e: Exception) {
                     Log.e("CustomShareActivity", "Error analyzing link", e)
                     runOnUiThread { displayError() }

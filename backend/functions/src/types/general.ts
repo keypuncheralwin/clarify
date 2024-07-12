@@ -19,8 +19,6 @@ export interface AnalysedLinkResponse extends ProcessedAIResponse {
 
 export interface UserHistoryItem {
   historyId: string;
-  analysedAt: string;
-  hashedUrl: string;
   analysedLink: AnalysedLinkResponse;
 }
 

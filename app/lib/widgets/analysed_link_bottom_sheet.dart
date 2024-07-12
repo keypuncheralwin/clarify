@@ -2,10 +2,11 @@ import 'package:clarify/utils/clarity_score_calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:clarify/types/analysed_link_response.dart';
 
 class AnalysedLinkBottomSheet extends StatefulWidget {
   final bool isLoading;
-  final Map<String, dynamic>? result;
+  final AnalysedLinkResponse? result;
   final String? errorMessage;
 
   const AnalysedLinkBottomSheet({
@@ -21,7 +22,7 @@ class AnalysedLinkBottomSheet extends StatefulWidget {
 
 class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   late bool _isLoading;
-  Map<String, dynamic>? _result;
+  AnalysedLinkResponse? _result;
   String? _errorMessage;
   OverlayEntry? _tooltipOverlay;
   final GlobalKey _buttonKey = GlobalKey();
@@ -63,7 +64,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   }
 
   void updateContent(
-      bool isLoading, Map<String, dynamic>? result, String? errorMessage) {
+      bool isLoading, AnalysedLinkResponse? result, String? errorMessage) {
     setState(() {
       _isLoading = isLoading;
       _result = result;
@@ -265,13 +266,13 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     );
   }
 
-  Widget _buildResultContent(Map<String, dynamic> result, bool isDarkMode) {
-    final title = result['title'] ?? 'No title available';
-    final clarityScore = result['clarityScore']?.toString() ?? 'N/A';
-    final clarityScoreValue = result['clarityScore'] ?? -1;
-    final explanation = result['explanation'] ?? 'No explanation available';
-    final answer = result['answer'] ?? 'No answer available';
-    final summary = result['summary'] ?? 'No summary available';
+  Widget _buildResultContent(AnalysedLinkResponse result, bool isDarkMode) {
+    final title = result.title;
+    final clarityScore = result.clarityScore.toString();
+    final clarityScoreValue = result.clarityScore;
+    final explanation = result.explanation;
+    final answer = result.answer;
+    final summary = result.summary;
     final combinedLength = answer.length + summary.length;
 
     double containerHeight =
@@ -400,8 +401,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
 
   Widget _buildActionButtons() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bool isVideo = _result?['isVideo'] ?? false;
-    final String url = _result?['url'] ?? '';
+    final bool isVideo = _result?.isVideo ?? false;
+    final String url = _result?.url ?? '';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
