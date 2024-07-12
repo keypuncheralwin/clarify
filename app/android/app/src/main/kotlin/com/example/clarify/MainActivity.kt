@@ -39,9 +39,9 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "analyzeLink") {
+            if (call.method == "analyseLink") {
                 val url = call.argument<String>("url")
-                Log.d("MainActivity", "analyzeLink called with url: $url")
+                Log.d("MainActivity", "analyseLink called with url: $url")
                 if (url != null) {
                     coroutineScope.launch {
                         try {
