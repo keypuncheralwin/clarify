@@ -1,10 +1,11 @@
-import 'package:clarify/providers/user_history_notifier.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:clarify/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:clarify/screens/main_screen.dart';
 import 'package:clarify/providers/theme_provider.dart';
+import 'package:clarify/screens/main_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences_tools/shared_preferences_tools.dart';
 import 'firebase_options.dart';
 
@@ -42,26 +43,50 @@ class ClarifyApp extends ConsumerStatefulWidget {
 
 class _ClarifyAppState extends ConsumerState<ClarifyApp>
     with WidgetsBindingObserver {
+  final GlobalKey<HomeScreenState> _homeScreenKey =
+      GlobalKey<HomeScreenState>();
+  static const platform = MethodChannel('com.clarify.app/api');
+  bool _shouldRefresh = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    debugPrint('Observer added');
+    platform.setMethodCallHandler(_handleNativeCalls);
+    debugPrint('ClarifyApp initialized and observer added');
+  }
+
+  Future<void> _handleNativeCalls(MethodCall call) async {
+    if (call.method == "historyUpdated") {
+      setState(() {
+        _shouldRefresh = true;
+      });
+      debugPrint(
+          'Link analyzed broadcast received, should refresh set to true');
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    debugPrint('Observer removed');
     super.dispose();
+    debugPrint('Observer removed and ClarifyApp disposed');
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
     debugPrint('AppLifecycleState changed: $state');
     if (state == AppLifecycleState.resumed) {
-      debugPrint('APP RESUMED');
+      debugPrint('App resumed');
+      if (_shouldRefresh) {
+        debugPrint('Triggering refresh as should refresh is true');
+        _homeScreenKey.currentState?.triggerRefresh();
+        setState(() {
+          _shouldRefresh = false;
+        });
+      } else {
+        debugPrint('No refresh needed as should refresh is false');
+      }
     }
   }
 
@@ -70,7 +95,7 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
     return MaterialApp(
       title: 'Clarify',
       theme: ref.watch(themeProvider),
-      home: const MainScreen(),
+      home: MainScreen(homeScreenKey: _homeScreenKey),
     );
   }
 }

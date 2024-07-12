@@ -1,3 +1,4 @@
+import 'package:clarify/screens/webview_screen.dart';
 import 'package:clarify/utils/clarity_score_calculator.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -218,8 +219,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                                         ? Colors.white
                                         : Colors.black),
                               ),
-                const SizedBox(height: 10),
-                _buildActionButtons(), // Updated to show two buttons
+                if (_result != null) const SizedBox(height: 10),
+                if (_result != null) _buildActionButtons(),
               ],
             ),
           ),
@@ -452,24 +453,37 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   }
 
   Future<void> _openLink(String url, bool isVideo) async {
-    if (isVideo) {
-      final Uri youtubeUri = Uri.parse('vnd.youtube:$url');
-      final Uri webYoutubeUri = Uri.parse(url);
+    final Uri uri = Uri.parse(url);
+    try {
+      if (isVideo) {
+        final Uri youtubeUri = Uri.parse('vnd.youtube:$url');
+        final Uri webYoutubeUri = Uri.parse(url);
 
-      if (await canLaunchUrl(youtubeUri)) {
-        await launchUrl(youtubeUri);
-      } else if (await canLaunchUrl(webYoutubeUri)) {
-        await launchUrl(webYoutubeUri, mode: LaunchMode.externalApplication);
+        if (await canLaunchUrl(youtubeUri)) {
+          await launchUrl(youtubeUri);
+        } else if (await canLaunchUrl(webYoutubeUri)) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebViewScreen(url: url),
+            ),
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
       } else {
-        throw 'Could not launch $url';
+        if (await canLaunchUrl(uri)) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebViewScreen(url: url),
+            ),
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
       }
-    } else {
-      final Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'Could not launch $url';
-      }
+    } catch (e) {
+      // Handle exception
+      print('Exception: $e');
     }
   }
 }

@@ -23,6 +23,10 @@ export interface UserHistoryItem {
   analysedLink: AnalysedLinkResponse;
 }
 
+export interface UserHistoryResponse {
+  userHistory: Array<UserHistoryItem>;
+  nextPageToken: string | null;
+}
 export interface FailedToAnalyseResponse {
   url: string;
   hashedUrl: string;

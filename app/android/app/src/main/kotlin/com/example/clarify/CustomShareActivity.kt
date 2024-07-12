@@ -22,6 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+
 class CustomShareActivity : Activity() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -106,14 +107,17 @@ class CustomShareActivity : Activity() {
                     val idToken = getIdToken()
                     val result = apiService.analyseLink(sharedText, idToken)
                     currentExplanation = result.explanation
+                    if (result.isAlreadyInHistory != true) {
+                        sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))  // Send broadcast
+                    }    
                     runOnUiThread { displayResult(result) }
                 } catch (e: Exception) {
-                    Log.e("CustomShareActivity", "Error analyzing link", e)
+                    Log.e("CustomShareActivity", "Error analysing link", e)
                     runOnUiThread { displayError() }
                 }
             }
         }
-    }
+    }    
 
     private suspend fun getIdToken(): String? = withContext(Dispatchers.IO) {
         val user = FirebaseAuth.getInstance().currentUser

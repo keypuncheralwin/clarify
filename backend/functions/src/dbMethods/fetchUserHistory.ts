@@ -1,10 +1,9 @@
 import { firestore } from 'firebase-admin';
-import { AnalysedLinkResponse, UserHistoryItem } from '../types/general';
-
-interface UserHistoryResponse {
-  userHistory: Array<UserHistoryItem>;
-  nextPageToken: string | null;
-}
+import {
+  AnalysedLinkResponse,
+  UserHistoryItem,
+  UserHistoryResponse,
+} from '../types/general';
 
 export async function fetchUserHistory(
   db: firestore.Firestore,

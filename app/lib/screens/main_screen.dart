@@ -14,7 +14,9 @@ import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
 import 'package:clarify/types/analysed_link_response.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
-  const MainScreen({super.key});
+  final GlobalKey<HomeScreenState> homeScreenKey;
+
+  const MainScreen({super.key, required this.homeScreenKey});
 
   @override
   _MainScreenState createState() => _MainScreenState();
@@ -28,13 +30,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey =
       GlobalKey<AnalysedLinkBottomSheetState>();
 
-  final List<Widget> _children = [
-    const HomeScreen(),
-    const FavoritesScreen(),
-    const AccountScreen(),
-  ];
+  late List<Widget> _children;
 
   final int _remainingTokens = 10; // Example token count
+
+  @override
+  void initState() {
+    super.initState();
+    _children = [
+      HomeScreen(key: widget.homeScreenKey),
+      const FavoritesScreen(),
+      const AccountScreen(),
+    ];
+  }
 
   void onTabTapped(int index) {
     setState(() {
