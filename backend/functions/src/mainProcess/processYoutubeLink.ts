@@ -4,7 +4,12 @@ import {
   getBase64ImageFromUrl,
   getYouTubeThumbnailUrls,
 } from '../utils/youtubeValidation';
-import { getChatResponse, hashUrl, processResponse } from '../utils/general';
+import {
+  getChatResponse,
+  getYouTubeUrl,
+  hashUrl,
+  processResponse,
+} from '../utils/general';
 import {
   extractYouTubeID,
   fetchTranscript,
@@ -25,10 +30,10 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { firestore } from 'firebase-admin';
-import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
+import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -44,40 +49,34 @@ async function processYouTubeLink(
   userUuid?: string
 ): Promise<void> {
   const db = firestore();
-  const hashedUrl = hashUrl(url);
-
-  if (!extractYouTubeID(url)) {
+  const youtubeId = extractYouTubeID(url);
+  if (!youtubeId) {
     saveFailedToAnalyseLink(url, 'Not able to extract YouTube ID from URL');
     res.status(400).json({ error: 'Unable to extract video ID from URL' });
     return;
   }
+  // We have to do this since YouTube can have multiple url variations for the same video
+  // This way we make sure that the video is only saved once
+  const finalUrl = getYouTubeUrl(youtubeId);
+  const hashedUrl = hashUrl(finalUrl);
 
-  const alreadyAnalysed = await getAnalysedLinkIfExists(
-    hashedUrl,
-    db,
-    userUuid
-  );
+  let response = await getAnalysedLinkIfExists(hashedUrl, db);
 
-  if (alreadyAnalysed) {
+  if (response) {
     if (userUuid) {
-      const isAlreadyInHistory = await saveUrlToUserHistory(
-        hashedUrl,
-        db,
-        userUuid
-      );
-      alreadyAnalysed.isAlreadyInHistory = isAlreadyInHistory;
+      response = await saveUrlToUserHistory(hashedUrl, db, userUuid, response);
     }
-    res.json({ response: alreadyAnalysed });
+    res.json({ response });
     return;
   }
 
   try {
     // Fetch transcript using custom function
-    const { videoTitle, transcript } = await fetchTranscript(url);
+    const { videoTitle, transcript } = await fetchTranscript(finalUrl);
     const transcriptText = transcript.map((entry) => entry.text).join(' ');
 
     // Fetch and encode thumbnail image
-    const thumbnailUrls = getYouTubeThumbnailUrls(url);
+    const thumbnailUrls = getYouTubeThumbnailUrls(finalUrl);
     const thumbnailBase64 = await getBase64ImageFromUrl(thumbnailUrls);
 
     const prompt = generateClickbaitYouTubePrompt(videoTitle, transcriptText);
@@ -128,21 +127,26 @@ async function processYouTubeLink(
     const aiResponse = await getChatResponse(messageParts, chatSession);
 
     if (aiResponse) {
-      const processedAIResponse = processResponse(aiResponse, 'youtube', url);
-      const analysedLink = await saveAnalysedLink(
-        hashedUrl,
-        db,
-        processedAIResponse
+      const processedAIResponse = processResponse(
+        aiResponse,
+        'youtube',
+        finalUrl
       );
+      response = await saveAnalysedLink(hashedUrl, db, processedAIResponse);
       if (userUuid) {
-        await saveUrlToUserHistory(hashedUrl, db, userUuid);
+        response = await saveUrlToUserHistory(
+          hashedUrl,
+          db,
+          userUuid,
+          response
+        );
       }
-      logger.info(`Received response: ${JSON.stringify(analysedLink)}`);
-      res.json({ response: analysedLink });
+      logger.info(`Received response: ${JSON.stringify(response)}`);
+      res.json({ response });
     } else {
       logger.error('No response received from the AI chat session');
       saveFailedToAnalyseLink(
-        url,
+        finalUrl,
         'No response received from the AI chat session'
       );
       res.status(500).send('Internal Server Error');
@@ -151,7 +155,7 @@ async function processYouTubeLink(
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);
-      saveFailedToAnalyseLink(url, 'Unable to fetch video transcript');
+      saveFailedToAnalyseLink(finalUrl, 'Unable to fetch video transcript');
       res
         .status(400)
         .json({ error: 'Transcript fetch error', details: error.message });
@@ -163,7 +167,7 @@ async function processYouTubeLink(
         },
         error
       );
-      saveFailedToAnalyseLink(url, 'Video not supported');
+      saveFailedToAnalyseLink(finalUrl, 'Video not supported');
       res.status(400).json({
         error:
           'Content was blocked due to safety concerns. Please try with a different input.',
@@ -171,7 +175,7 @@ async function processYouTubeLink(
       });
     } else {
       logger.error('Error processing YouTube link', error);
-      saveFailedToAnalyseLink(url, 'Error processing YouTube link');
+      saveFailedToAnalyseLink(finalUrl, 'Error processing YouTube link');
       res.status(500).json({
         error: 'Failed to process YouTube link',
         details: error.message,

@@ -71,3 +71,8 @@ export const processResponse = (
     isVideo: isVideo,
   };
 };
+
+export function getYouTubeUrl(videoId: string): string {
+  const baseUrl = 'https://www.youtube.com/watch?v=';
+  return `${baseUrl}${videoId}`;
+}

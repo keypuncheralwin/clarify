@@ -1,11 +1,13 @@
 import { firestore } from 'firebase-admin';
 import logger from '../logger/logger';
+import { AnalysedLinkResponse } from '../types/general';
 
 export async function saveUrlToUserHistory(
   hashedUrl: string,
   db: firestore.Firestore,
-  userUuid: string
-): Promise<boolean> {
+  userUuid: string,
+  analysedLinkResponse: AnalysedLinkResponse
+): Promise<AnalysedLinkResponse> {
   const timeStamp = new Date().toISOString(); // Store in ISO format (UTC)
   const userRef = db.collection('Users').doc(userUuid);
   const historyRef = userRef
@@ -13,7 +15,7 @@ export async function saveUrlToUserHistory(
     .where('hashedUrl', '==', hashedUrl);
 
   try {
-    const result = await db.runTransaction(async (transaction) => {
+    await db.runTransaction(async (transaction) => {
       const historySnapshot = await transaction.get(historyRef);
 
       if (historySnapshot.empty) {
@@ -22,15 +24,18 @@ export async function saveUrlToUserHistory(
           hashedUrl: hashedUrl,
           analysedAt: timeStamp,
         });
-
+        analysedLinkResponse.isAlreadyInHistory = false;
+        analysedLinkResponse.analysedAt = timeStamp;
         logger.info('URL added to user history successfully');
-        return false;
+      } else {
+        const existingDoc = historySnapshot.docs[0];
+        const analysedAt = existingDoc.get('analysedAt');
+        analysedLinkResponse.analysedAt = analysedAt;
+        analysedLinkResponse.isAlreadyInHistory = true;
+        logger.info('URL already exists in user history');
       }
-
-      logger.info('URL already exists in user history');
-      return true;
     });
-    return result;
+    return analysedLinkResponse;
   } catch (error) {
     logger.error('Error adding URL to user history:', error);
     throw new Error('Error adding URL to user history');
