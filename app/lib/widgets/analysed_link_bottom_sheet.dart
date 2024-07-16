@@ -314,7 +314,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
           ),
         ),
         const SizedBox(height: 10),
-        combinedLength > 800
+        combinedLength > 1000
             ? Stack(
                 children: [
                   SizedBox(
@@ -348,7 +348,9 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                       ),
                     ),
                   ),
-                  if (!_isAtBottom)
+                  if (!_isAtBottom &&
+                      _scrollController.hasClients &&
+                      _scrollController.position.maxScrollExtent > 0)
                     Positioned(
                       bottom: 0,
                       left: 0,
