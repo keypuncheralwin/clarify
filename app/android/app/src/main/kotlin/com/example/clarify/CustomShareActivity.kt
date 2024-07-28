@@ -106,14 +106,21 @@ class CustomShareActivity : Activity() {
                 try {
                     val idToken = getIdToken()
                     val result = apiService.analyseLink(sharedText, idToken)
-                    currentExplanation = result.explanation
-                    if (result.isAlreadyInHistory != true) {
-                        sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))  // Send broadcast
-                    }    
-                    runOnUiThread { displayResult(result) }
+                    when (result) {
+                        is AnalysisResult.Success -> {
+                            currentExplanation = result.data.explanation
+                            if (result.data.isAlreadyInHistory != true) {
+                                sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))  // Send broadcast
+                            }
+                            runOnUiThread { displayResult(result.data) }
+                        }
+                        is AnalysisResult.Error -> {
+                            runOnUiThread { displayError(result.errorMessage) }
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.e("CustomShareActivity", "Error analysing link", e)
-                    runOnUiThread { displayError() }
+                    runOnUiThread { displayError("We're having trouble clarifying that, please try again later.") }
                 }
             }
         }
@@ -152,14 +159,14 @@ class CustomShareActivity : Activity() {
         }
     }
 
-    private fun displayError() {
+    private fun displayError(message: String) {
         shimmerTitle.stopShimmer()
         shimmerTitle.visibility = View.GONE
         shimmerContent.stopShimmer()
         shimmerContent.visibility = View.GONE
 
         titleTextView.visibility = View.VISIBLE
-        titleTextView.text = "Failed to analyse link"
+        titleTextView.text = message
     }
 
     private fun showTooltip(explanation: String, anchor: View) {

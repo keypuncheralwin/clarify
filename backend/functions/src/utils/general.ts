@@ -1,8 +1,6 @@
 import { AIResponse, ProcessedAIResponse } from '../types/general';
 import logger from '../logger/logger';
 import { ChatSession, Part } from '@google/generative-ai';
-import { clarityScoreDefinitionArticle } from '../constants/article';
-import { clarityScoreDefinitionYoutube } from '../constants/youtube';
 import * as crypto from 'crypto';
 
 export function hashUrl(url: string): string {
@@ -57,16 +55,10 @@ export const processResponse = (
   type: 'youtube' | 'article',
   url: string
 ): ProcessedAIResponse => {
-  const clarityScoreDefinition =
-    type === 'youtube'
-      ? clarityScoreDefinitionYoutube
-      : clarityScoreDefinitionArticle;
-
   const isVideo = type === 'youtube';
 
   return {
     ...response,
-    explanation: clarityScoreDefinition + response.explanation,
     url: url,
     isVideo: isVideo,
   };

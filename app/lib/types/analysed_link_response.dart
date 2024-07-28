@@ -26,17 +26,19 @@ class AnalysedLinkResponse {
   });
 
   factory AnalysedLinkResponse.fromJson(Map<String, dynamic> json) {
+    print("Parsing AnalysedLinkResponse from JSON: $json");
+
     return AnalysedLinkResponse(
-      title: json['title'],
-      isClickBait: json['isClickBait'],
-      explanation: json['explanation'],
-      summary: json['summary'],
-      clarityScore: json['clarityScore'],
-      url: json['url'],
-      isVideo: json['isVideo'],
-      answer: json['answer'],
-      hashedUrl: json['hashedUrl'],
-      analysedAt: json['analysedAt'],
+      title: json['title'] ?? '',
+      isClickBait: json['isClickBait'] ?? false,
+      explanation: json['explanation'] ?? '',
+      summary: json['summary'] ?? '',
+      clarityScore: json['clarityScore'] ?? 0,
+      url: json['url'] ?? '',
+      isVideo: json['isVideo'] ?? false,
+      answer: json['answer'] ?? '',
+      hashedUrl: json['hashedUrl'] ?? '',
+      analysedAt: json['analysedAt'] ?? '',
       isAlreadyInHistory: json['isAlreadyInHistory'],
     );
   }

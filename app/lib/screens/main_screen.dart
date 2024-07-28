@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/providers/user_history_notifier.dart';
 import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
-import 'package:clarify/types/analysed_link_response.dart';
+import 'package:clarify/types/analysis_result.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   final GlobalKey<HomeScreenState> homeScreenKey;
@@ -24,7 +24,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
-  AnalysedLinkResponse? _result;
+  AnalysisResult? _result;
   bool _isLoading = false;
   String? _errorMessage;
   final GlobalKey<AnalysedLinkBottomSheetState> _bottomSheetKey =
@@ -66,14 +66,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       setState(() {
         _result = result;
         _isLoading = false;
-        _bottomSheetKey.currentState
-            ?.updateContent(_isLoading, _result, _errorMessage);
+        if (result != null && result.status == 'success') {
+          _errorMessage = null;
+          _bottomSheetKey.currentState
+              ?.updateContent(_isLoading, result.data, _errorMessage);
+        } else {
+          _errorMessage = result?.error?.errorMessage ?? 'An error occurred';
+          _bottomSheetKey.currentState
+              ?.updateContent(_isLoading, null, _errorMessage);
+        }
       });
 
-      if (result != null) {
+      if (result != null && result.status == 'success' && result.data != null) {
         final historyItem = UserHistoryItem(
           historyId: 'PLACEHOLDER',
-          analysedLink: result,
+          analysedLink: result.data!,
         );
         ref.read(userHistoryProvider.notifier).addNewHistory(historyItem);
       }
@@ -95,7 +102,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         return AnalysedLinkBottomSheet(
           key: _bottomSheetKey,
           isLoading: _isLoading,
-          result: _result,
+          result: _result?.data,
           errorMessage: _errorMessage,
         );
       },

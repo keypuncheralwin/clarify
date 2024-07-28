@@ -6,6 +6,7 @@ export type AIResponse = {
   clarityScore: number;
   isVideo: boolean;
   answer: string;
+  error?: string;
 };
 
 export type ProcessedAIResponse = AIResponse & {
@@ -26,6 +27,15 @@ export interface UserHistoryItem {
 export interface UserHistoryResponse {
   userHistory: Array<UserHistoryItem>;
   nextPageToken: string | null;
+}
+
+export interface AnalysisResult {
+  status: 'success' | 'error';
+  data?: AnalysedLinkResponse;
+  error?: {
+    code: number;
+    message: string;
+  };
 }
 export interface FailedToAnalyseResponse {
   url: string;

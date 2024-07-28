@@ -1,6 +1,5 @@
-import axios from 'axios';
-import { URL } from 'url';
-import logger from '../logger/logger'; // Ensure the correct import path
+import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
+import logger from '../logger/logger';
 
 /**
  * Extracts and validates a URL from a string.
@@ -8,76 +7,34 @@ import logger from '../logger/logger'; // Ensure the correct import path
  * @returns {Promise<string | null>} - A promise that resolves to the valid URL or null if no valid URL is found.
  */
 export default async function extractValidUrl(
-  inputString: string
+  input: string
 ): Promise<string | null> {
-  logger.info(`Extracting URL from input string: ${inputString}`);
+  // Regular expression to match URLs
+  const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+  const urls = input.match(urlPattern);
 
-  // Regex to match URLs
-  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  if (urls && urls.length > 0) {
+    const lastUrl = urls[urls.length - 1];
 
-  // Extract URLs from the string
-  const urls = inputString.match(urlRegex);
-
-  if (!urls || urls.length === 0) {
-    logger.warn('No URLs found in the input string');
-    return null;
-  }
-
-  // Check if the URL is valid
-  for (const url of urls) {
-    let currentUrl = url;
-
-    // Ensure the URL starts with http or https
-    if (!currentUrl.startsWith('http')) {
-      currentUrl = 'http://' + currentUrl;
-    }
-
+    // Sanitize the URL
     try {
-      const decodedUrl = decodeURIComponent(currentUrl);
-      const urlObj = new URL(decodedUrl);
+      // Use the URL constructor to parse and reassemble the URL
+      const parsedUrl = new URL(lastUrl);
 
-      if (urlObj.hostname === 'www.google.com' && urlObj.pathname === '/url') {
-        // If it's a Google redirect URL, extract the 'url' parameter
-        const actualUrl = urlObj.searchParams.get('url');
-        if (actualUrl) {
-          logger.info(`Extracted URL from Google redirect: ${actualUrl}`);
-          return decodeURIComponent(actualUrl);
-        }
-      } else {
-        const response = await axios.get(decodedUrl, { maxRedirects: 5 });
+      // Encode the URL components to ensure special characters are handled
+      const sanitisedUrl = encodeURI(parsedUrl.href);
 
-        // Check if the response is valid
-        if (response.status >= 200 && response.status < 300) {
-          const finalUrl = response.request.res.responseUrl;
-          logger.info(`Valid URL found: ${finalUrl}`);
-          return finalUrl;
-        } else {
-          logger.error(
-            `Invalid response status: ${response.status} for URL: ${decodedUrl}`
-          );
-        }
-      }
+      return sanitisedUrl;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      logger.error(`Error validating URL: ${currentUrl}`, error);
-
-      if (
-        error.response &&
-        (error.response.status === 301 || error.response.status === 302)
-      ) {
-        // Handle redirect
-        const redirectUrl = error.response.headers.location;
-        if (redirectUrl) {
-          const resolvedUrl = redirectUrl.startsWith('http')
-            ? redirectUrl
-            : new URL(redirectUrl, currentUrl).href;
-          logger.info(`Redirect URL resolved to: ${resolvedUrl}`);
-          return resolvedUrl;
-        }
-      }
+      // If the URL is invalid, handle the error appropriately
+      logger.error('Invalid URL:', error);
+      saveFailedToAnalyseLink(input, `Invalid URL: ${error?.message}`);
+      return null;
     }
   }
 
-  logger.warn('No valid URLs found after validation');
+  // Return null if no valid URL is found
+  saveFailedToAnalyseLink(input, `Invalid URL`);
   return null;
 }

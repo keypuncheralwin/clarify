@@ -1,12 +1,10 @@
 import { Router, Request, Response } from 'express';
-import extractValidUrl from '../utils/extractValidUrl';
 import processArticleLink from '../mainProcess/processArticleLink';
 import processYouTubeLink from '../mainProcess/processYoutubeLink';
 import { containsValidYoutubeUrl } from '../utils/youtubeValidation';
 import logger from '../logger/logger';
-import { specialCasesCheck } from '../utils/specialCaseUrlChecks';
+import extractValidUrl from '../utils/extractValidUrl';
 import { verifyUserOrDevice } from '../middleware/authMiddleware';
-import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 
 const router = Router();
 
@@ -37,12 +35,10 @@ router.post(
       } else {
         const validUrl = await extractValidUrl(url);
         if (!validUrl) {
-          saveFailedToAnalyseLink(url, 'Invalid URL');
           res.status(400).send('Invalid URL');
           return;
         }
-        const finalUrl = specialCasesCheck(validUrl);
-        await processArticleLink(finalUrl, res, apiKey, userUuid);
+        await processArticleLink(validUrl, res, apiKey, userUuid);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -34,6 +34,7 @@ import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
+import { AnalysisResult } from '../types/general';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -66,7 +67,11 @@ async function processYouTubeLink(
     if (userUuid) {
       response = await saveUrlToUserHistory(hashedUrl, db, userUuid, response);
     }
-    res.json({ response });
+    const analysisResult: AnalysisResult = {
+      status: 'success',
+      data: response,
+    };
+    res.json(analysisResult);
     return;
   }
 
@@ -126,7 +131,18 @@ async function processYouTubeLink(
 
     const aiResponse = await getChatResponse(messageParts, chatSession);
 
-    if (aiResponse) {
+    if (aiResponse?.error) {
+      logger.error(`AI response error: ${aiResponse.error}`);
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 400,
+          message: aiResponse.error,
+        },
+      };
+      saveFailedToAnalyseLink(finalUrl, aiResponse.error);
+      res.status(400).json(analysisResult);
+    } else if (aiResponse) {
       const processedAIResponse = processResponse(
         aiResponse,
         'youtube',
@@ -142,23 +158,39 @@ async function processYouTubeLink(
         );
       }
       logger.info(`Received response: ${JSON.stringify(response)}`);
-      res.json({ response });
+      const analysisResult: AnalysisResult = {
+        status: 'success',
+        data: response,
+      };
+      res.json(analysisResult);
     } else {
       logger.error('No response received from the AI chat session');
       saveFailedToAnalyseLink(
         finalUrl,
         'No response received from the AI chat session'
       );
-      res.status(500).send('Internal Server Error');
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 500,
+          message: 'Internal Server Error',
+        },
+      };
+      res.status(500).json(analysisResult);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error instanceof YoutubeTranscriptError) {
       logger.error('Transcript fetch error', { message: error.message }, error);
       saveFailedToAnalyseLink(finalUrl, 'Unable to fetch video transcript');
-      res
-        .status(400)
-        .json({ error: 'Transcript fetch error', details: error.message });
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 400,
+          message: 'Transcript fetch error',
+        },
+      };
+      res.status(400).json(analysisResult);
     } else if (error.response && error.response.data) {
       logger.error(
         'Video not supported',
@@ -168,18 +200,26 @@ async function processYouTubeLink(
         error
       );
       saveFailedToAnalyseLink(finalUrl, 'Video not supported');
-      res.status(400).json({
-        error:
-          'Content was blocked due to safety concerns. Please try with a different input.',
-        details: error.response.data,
-      });
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 400,
+          message:
+            'Content was blocked due to safety concerns. Please try with a different input.',
+        },
+      };
+      res.status(400).json(analysisResult);
     } else {
       logger.error('Error processing YouTube link', error);
       saveFailedToAnalyseLink(finalUrl, 'Error processing YouTube link');
-      res.status(500).json({
-        error: 'Failed to process YouTube link',
-        details: error.message,
-      });
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 500,
+          message: 'Failed to process YouTube link',
+        },
+      };
+      res.status(500).json(analysisResult);
     }
   }
 }

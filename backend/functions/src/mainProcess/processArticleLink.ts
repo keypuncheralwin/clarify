@@ -1,25 +1,22 @@
 import { Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import {
-  clickbaitArticleCriteria,
-  generateClickbaitArticlePrompt,
-} from '../constants/article';
+import { clickbaitArticleCriteria } from '../constants/article';
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
-import fetchArticle from '../utils/fetchArticle';
 import { getChatResponse, hashUrl, processResponse } from '../utils/general';
 import { firestore } from 'firebase-admin';
 import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
+import { AnalysisResult } from '../types/general';
 
 /**
  * Process the article link and handle the entire flow.
- * @param validUrl - The validated URL of the article.
- * @param model - The Google Generative AI model.
+ * @param url - The validated URL of the article.
  * @param res - The Express response object.
  * @param apiKey - The gemini api key.
+ * @param userUuid - Optional user UUID.
  */
 async function processArticleLink(
   url: string,
@@ -27,7 +24,7 @@ async function processArticleLink(
   apiKey: string,
   userUuid?: string
 ): Promise<void> {
-  //Initialise firestore
+  // Initialize firestore
   const db = firestore();
   const hashedUrl = hashUrl(url);
 
@@ -37,7 +34,11 @@ async function processArticleLink(
     if (userUuid) {
       response = await saveUrlToUserHistory(hashedUrl, db, userUuid, response);
     }
-    res.json({ response });
+    const analysisResult: AnalysisResult = {
+      status: 'success',
+      data: response,
+    };
+    res.json(analysisResult);
     return;
   }
 
@@ -48,33 +49,31 @@ async function processArticleLink(
     systemInstruction: clickbaitArticleCriteria,
   });
 
-  const article = await fetchArticle(url);
-  if (!article) {
-    saveFailedToAnalyseLink(url, 'Not able to find article');
-    res.status(400).send('Invalid URL');
-    return;
-  }
-
-  const { title, subtitle, content } = article;
-  logger.info(`Fetched article: ${title}`);
-
   const chatSession = model.startChat({
     safetySettings,
     generationConfig,
   });
 
-  const prompt: string = generateClickbaitArticlePrompt(
-    title,
-    subtitle,
-    content
-  );
+  const prompt = `
+  please visit and analyze the following webpage ${url}
+`;
   logger.info('Generated prompt');
   logger.info(`Prompt: ${prompt}`);
 
   try {
     const aiResponse = await getChatResponse(prompt, chatSession);
 
-    if (aiResponse) {
+    if (aiResponse?.error) {
+      logger.error(`AI response error: ${aiResponse.error}`);
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 200,
+          message: aiResponse.error,
+        },
+      };
+      res.status(200).json(analysisResult);
+    } else if (aiResponse) {
       const processedAIResponse = processResponse(aiResponse, 'article', url);
       response = await saveAnalysedLink(hashedUrl, db, processedAIResponse);
       if (userUuid) {
@@ -86,20 +85,38 @@ async function processArticleLink(
         );
       }
       logger.info(`Received response: ${JSON.stringify(response)}`);
-      res.json({ response });
+      const analysisResult: AnalysisResult = {
+        status: 'success',
+        data: response,
+      };
+      res.json(analysisResult);
     } else {
-      logger.error('No response received from the AI chat sesssion');
+      logger.error('No response received from the AI chat session');
       saveFailedToAnalyseLink(
         url,
-        'No response received from the AI chat sesssion'
+        'No response received from the AI chat session'
       );
-      res.status(500).send('Internal Server Error');
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 500,
+          message: 'Internal Server Error',
+        },
+      };
+      res.status(500).json(analysisResult);
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     logger.error(`Error processing article: ${error?.message}`, error);
     saveFailedToAnalyseLink(url, `Error processing article: ${error?.message}`);
-    res.status(500).send('Internal Server Error');
+    const analysisResult: AnalysisResult = {
+      status: 'error',
+      error: {
+        code: 500,
+        message: 'Internal Server Error',
+      },
+    };
+    res.status(500).json(analysisResult);
   }
 }
 

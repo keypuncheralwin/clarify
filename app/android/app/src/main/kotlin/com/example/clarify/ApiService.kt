@@ -20,7 +20,7 @@ class ApiService(private val context: Context) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    suspend fun analyseLink(link: String, idToken: String?): AnalysedLinkResponse = withContext(Dispatchers.IO) {
+    suspend fun analyseLink(link: String, idToken: String?): AnalysisResult = withContext(Dispatchers.IO) {
         val url = readConfig()
         val deviceId = getDeviceId() ?: "NO_DEVICE_ID"
         val json = JSONObject().apply {
@@ -45,20 +45,31 @@ class ApiService(private val context: Context) {
         val responseBody = response.body?.string() ?: throw Exception("Response body is null")
         Log.d("ApiService", "Response: $responseBody")
 
-        val jsonResponse = JSONObject(responseBody).getJSONObject("response")
-        AnalysedLinkResponse(
-            title = jsonResponse.getString("title"),
-            isClickBait = jsonResponse.getBoolean("isClickBait"),
-            explanation = jsonResponse.getString("explanation"),
-            summary = jsonResponse.getString("summary"),
-            clarityScore = jsonResponse.getInt("clarityScore"),
-            answer = jsonResponse.optString("answer"),
-            url = jsonResponse.getString("url"),
-            isVideo = jsonResponse.getBoolean("isVideo"),
-            hashedUrl = jsonResponse.getString("hashedUrl"),
-            analysedAt = jsonResponse.getString("analysedAt"),
-            isAlreadyInHistory = jsonResponse.optBoolean("isAlreadyInHistory", false) 
-        )
+        val jsonResponse = JSONObject(responseBody)
+        if (jsonResponse.getString("status") == "success") {
+            val data = jsonResponse.getJSONObject("data")
+            AnalysisResult.Success(
+                AnalysedLinkResponse(
+                    title = data.getString("title"),
+                    isClickBait = data.getBoolean("isClickBait"),
+                    explanation = data.getString("explanation"),
+                    summary = data.getString("summary"),
+                    clarityScore = data.getInt("clarityScore"),
+                    answer = data.optString("answer"),
+                    url = data.getString("url"),
+                    isVideo = data.getBoolean("isVideo"),
+                    hashedUrl = data.getString("hashedUrl"),
+                    analysedAt = data.getString("analysedAt"),
+                    isAlreadyInHistory = data.optBoolean("isAlreadyInHistory", false)
+                )
+            )
+        } else {
+            val error = jsonResponse.getJSONObject("error")
+            AnalysisResult.Error(
+                errorCode = error.getInt("code"),
+                errorMessage = error.getString("message")
+            )
+        }
     }
 
     private fun readConfig(): String {
@@ -77,6 +88,11 @@ class ApiService(private val context: Context) {
             null
         }
     }
+}
+
+sealed class AnalysisResult {
+    data class Success(val data: AnalysedLinkResponse) : AnalysisResult()
+    data class Error(val errorCode: Int, val errorMessage: String) : AnalysisResult()
 }
 
 data class AnalysedLinkResponse(

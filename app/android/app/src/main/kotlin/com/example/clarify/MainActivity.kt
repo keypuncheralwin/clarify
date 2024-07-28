@@ -47,19 +47,35 @@ class MainActivity : FlutterActivity() {
                         try {
                             val idToken = getIdToken()
                             val response = ApiService(applicationContext).analyseLink(url, idToken)
-                            result.success(mapOf(
-                                "title" to response.title,
-                                "isClickBait" to response.isClickBait,
-                                "clarityScore" to response.clarityScore,
-                                "answer" to response.answer,
-                                "explanation" to response.explanation,
-                                "summary" to response.summary,
-                                "url" to response.url,
-                                "isVideo" to response.isVideo,
-                                "hashedUrl" to response.hashedUrl,
-                                "analysedAt" to response.analysedAt,
-                                "isAlreadyInHistory" to response.isAlreadyInHistory
-                            ))
+                            when (response) {
+                                is AnalysisResult.Success -> {
+                                    result.success(mapOf(
+                                        "status" to "success",
+                                        "data" to mapOf(
+                                            "title" to response.data.title,
+                                            "isClickBait" to response.data.isClickBait,
+                                            "clarityScore" to response.data.clarityScore,
+                                            "answer" to response.data.answer,
+                                            "explanation" to response.data.explanation,
+                                            "summary" to response.data.summary,
+                                            "url" to response.data.url,
+                                            "isVideo" to response.data.isVideo,
+                                            "hashedUrl" to response.data.hashedUrl,
+                                            "analysedAt" to response.data.analysedAt,
+                                            "isAlreadyInHistory" to response.data.isAlreadyInHistory
+                                        )
+                                    ))
+                                }
+                                is AnalysisResult.Error -> {
+                                    result.success(mapOf(
+                                        "status" to "error",
+                                        "error" to mapOf(
+                                            "errorCode" to response.errorCode,
+                                            "errorMessage" to response.errorMessage
+                                        )
+                                    ))
+                                }
+                            }
                         } catch (e: Exception) {
                             Log.e("MainActivity", "Error analysing link", e)
                             result.error("UNAVAILABLE", "Link analysis failed.", null)
