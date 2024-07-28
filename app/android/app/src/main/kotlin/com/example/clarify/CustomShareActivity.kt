@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
@@ -33,6 +35,9 @@ class CustomShareActivity : Activity() {
     private lateinit var clarityScoreTextView: TextView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
+    private lateinit var doesNothingButton: Button
+    private lateinit var visitLinkButton: Button
+    private lateinit var buttonLayout: LinearLayout
     private var tooltipWindow: PopupWindow? = null
     private var currentExplanation: String? = null
 
@@ -80,6 +85,15 @@ class CustomShareActivity : Activity() {
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
+        doesNothingButton = bottomSheetView.findViewById(R.id.doesNothingButton)
+        visitLinkButton = bottomSheetView.findViewById(R.id.visitLinkButton)
+        buttonLayout = bottomSheetView.findViewById(R.id.buttonLayout)
+
+        // Set initial visibility to GONE
+        buttonLayout.visibility = View.GONE
+        doesNothingButton.visibility = View.GONE
+        visitLinkButton.visibility = View.GONE
+        Log.d("CustomShareActivity", "Buttons initialized and set to GONE")
 
         bottomSheetView.setOnClickListener {
             hideTooltip()
@@ -87,6 +101,17 @@ class CustomShareActivity : Activity() {
 
         clarityScoreTextView.setOnClickListener {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
+        }
+
+        doesNothingButton.setOnClickListener {
+            // Handle "Does Nothing" button click
+        }
+
+        visitLinkButton.setOnClickListener {
+            // Handle "Visit Link" button click
+            val url = summaryTextView.text.toString()
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
         }
     }
 
@@ -124,7 +149,7 @@ class CustomShareActivity : Activity() {
                 }
             }
         }
-    }    
+    }
 
     private suspend fun getIdToken(): String? = withContext(Dispatchers.IO) {
         val user = FirebaseAuth.getInstance().currentUser
@@ -148,6 +173,14 @@ class CustomShareActivity : Activity() {
         titleTextView.text = result.title
         clickbaitTextView.text = result.answer
         summaryTextView.text = result.summary
+
+        // Post visibility changes to ensure they are applied
+        buttonLayout.post {
+            buttonLayout.visibility = View.VISIBLE
+            doesNothingButton.visibility = View.VISIBLE
+            visitLinkButton.visibility = View.VISIBLE
+            Log.d("CustomShareActivity", "Buttons set to VISIBLE")
+        }
     }
 
     private fun getClarityScoreColor(score: Int): Int {
@@ -167,6 +200,12 @@ class CustomShareActivity : Activity() {
 
         titleTextView.visibility = View.VISIBLE
         titleTextView.text = message
+
+        // Hide buttons if there is an error
+        buttonLayout.visibility = View.GONE
+        doesNothingButton.visibility = View.GONE
+        visitLinkButton.visibility = View.GONE
+        Log.d("CustomShareActivity", "Buttons set to GONE due to error")
     }
 
     private fun showTooltip(explanation: String, anchor: View) {
