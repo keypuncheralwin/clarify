@@ -25,7 +25,7 @@ class ApiService(private val context: Context) {
         val deviceId = getDeviceId() ?: "NO_DEVICE_ID"
         val json = JSONObject().apply {
             put("url", link)
-            put("device_id", deviceId)
+            put("deviceId", deviceId)
         }
         val requestBody = json.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
         val requestBuilder = Request.Builder()

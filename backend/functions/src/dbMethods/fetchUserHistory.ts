@@ -1,8 +1,8 @@
 import { firestore } from 'firebase-admin';
 import {
   AnalysedLinkResponse,
-  UserHistoryItem,
-  UserHistoryResponse,
+  HistoryItem,
+  HistoryResponse,
 } from '../types/general';
 
 export async function fetchUserHistory(
@@ -11,7 +11,7 @@ export async function fetchUserHistory(
   pageSize: number,
   pageToken?: string,
   searchKeyword: string = ''
-): Promise<UserHistoryResponse> {
+): Promise<HistoryResponse> {
   let userHistoryRef = db
     .collection('Users')
     .doc(userUuid)
@@ -33,7 +33,7 @@ export async function fetchUserHistory(
   }
 
   const userHistorySnapshot = await userHistoryRef.get();
-  const userHistoryData: UserHistoryItem[] = [];
+  const userHistoryData: HistoryItem[] = [];
 
   for (const doc of userHistorySnapshot.docs) {
     const historyData = doc.data();

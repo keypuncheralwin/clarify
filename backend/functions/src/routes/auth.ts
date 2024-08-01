@@ -37,7 +37,7 @@ router.post(
 router.post(
   '/verify-code',
   async (req: Request, res: Response): Promise<void> => {
-    const { email, code, name, device_id } = req.body;
+    const { email, code, name, deviceId } = req.body;
 
     if (!email || !code) {
       res.status(400).send('Email and code are required');
@@ -89,8 +89,8 @@ router.post(
         .createCustomToken(userRecord.uid);
 
       // Link the device ID to the user ID
-      if (device_id) {
-        const deviceRef = db.collection('DeviceRequests').doc(device_id);
+      if (deviceId) {
+        const deviceRef = db.collection('DeviceRequests').doc(deviceId);
         await deviceRef.set(
           { userId: userRecord.uid, requestCount: 0 },
           { merge: true }

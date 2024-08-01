@@ -20,9 +20,9 @@ router.post(
       return;
     }
 
-    const { url, device_id } = req.body;
+    const { url, deviceId } = req.body;
     const userUuid = req.user?.uid;
-
+    logger.info(deviceId);
     if (!url) {
       res.status(400).send('No URL provided');
       return;

@@ -19,23 +19,13 @@ export interface AnalysedLinkResponse extends ProcessedAIResponse {
   isAlreadyInHistory?: boolean;
 }
 
-export interface UserHistoryItem {
+export interface HistoryItem {
   historyId: string;
   analysedLink: AnalysedLinkResponse;
 }
 
-export interface UserHistoryResponse {
-  userHistory: Array<UserHistoryItem>;
-  nextPageToken: string | null;
-}
-
-export interface UserFavoriteItem {
-  favoriteId: string;
-  analysedLink: AnalysedLinkResponse;
-}
-
-export interface UserFavouriteResponse {
-  userHistory: Array<UserFavoriteItem>;
+export interface HistoryResponse {
+  userHistory: Array<HistoryItem>;
   nextPageToken: string | null;
 }
 
