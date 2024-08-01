@@ -34,6 +34,7 @@ router.post(
         await processYouTubeLink(youTubeVideoLink, res, apiKey, userUuid);
       } else {
         const validUrl = await extractValidUrl(url);
+        console.log('validURL:', validUrl);
         if (!validUrl) {
           res.status(400).send('Invalid URL');
           return;

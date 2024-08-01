@@ -35,11 +35,12 @@ class CustomShareActivity : Activity() {
     private lateinit var clarityScoreTextView: TextView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
-    private lateinit var doesNothingButton: Button
-    private lateinit var visitLinkButton: Button
+    private lateinit var button1: Button
+    private lateinit var button2: Button
     private lateinit var buttonLayout: LinearLayout
     private var tooltipWindow: PopupWindow? = null
     private var currentExplanation: String? = null
+    private var analysedLinkResponse: AnalysedLinkResponse? = null
 
     private val apiService by lazy { ApiService(applicationContext) }
 
@@ -85,14 +86,14 @@ class CustomShareActivity : Activity() {
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
-        doesNothingButton = bottomSheetView.findViewById(R.id.doesNothingButton)
-        visitLinkButton = bottomSheetView.findViewById(R.id.visitLinkButton)
+        button1 = bottomSheetView.findViewById(R.id.button1)
+        button2 = bottomSheetView.findViewById(R.id.button2)
         buttonLayout = bottomSheetView.findViewById(R.id.buttonLayout)
 
         // Set initial visibility to GONE
         buttonLayout.visibility = View.GONE
-        doesNothingButton.visibility = View.GONE
-        visitLinkButton.visibility = View.GONE
+        button1.visibility = View.GONE
+        button2.visibility = View.GONE
         Log.d("CustomShareActivity", "Buttons initialized and set to GONE")
 
         bottomSheetView.setOnClickListener {
@@ -103,16 +104,23 @@ class CustomShareActivity : Activity() {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
         }
 
-        doesNothingButton.setOnClickListener {
-            // Handle "Does Nothing" button click
+        button1.setOnClickListener {
+            analysedLinkResponse?.let { result ->
+                val url = result.url
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open"))
+                startActivity(intent)
+            }
         }
 
-        visitLinkButton.setOnClickListener {
+        button2.setOnClickListener {
             // Handle "Visit Link" button click
-            val url = summaryTextView.text.toString()
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
-        }
+            analysedLinkResponse?.let { result ->
+                val url = result.url
+                val isVideo = result.isVideo
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open?url=$url&isVideo=$isVideo"))
+                startActivity(intent)
+            }
+        }        
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -133,6 +141,7 @@ class CustomShareActivity : Activity() {
                     val result = apiService.analyseLink(sharedText, idToken)
                     when (result) {
                         is AnalysisResult.Success -> {
+                            analysedLinkResponse = result.data
                             currentExplanation = result.data.explanation
                             if (result.data.isAlreadyInHistory != true) {
                                 sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))  // Send broadcast
@@ -177,8 +186,8 @@ class CustomShareActivity : Activity() {
         // Post visibility changes to ensure they are applied
         buttonLayout.post {
             buttonLayout.visibility = View.VISIBLE
-            doesNothingButton.visibility = View.VISIBLE
-            visitLinkButton.visibility = View.VISIBLE
+            button1.visibility = View.VISIBLE
+            button2.visibility = View.VISIBLE
             Log.d("CustomShareActivity", "Buttons set to VISIBLE")
         }
     }
@@ -203,8 +212,8 @@ class CustomShareActivity : Activity() {
 
         // Hide buttons if there is an error
         buttonLayout.visibility = View.GONE
-        doesNothingButton.visibility = View.GONE
-        visitLinkButton.visibility = View.GONE
+        button1.visibility = View.GONE
+        button2.visibility = View.GONE
         Log.d("CustomShareActivity", "Buttons set to GONE due to error")
     }
 

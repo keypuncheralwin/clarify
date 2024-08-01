@@ -29,6 +29,16 @@ export interface UserHistoryResponse {
   nextPageToken: string | null;
 }
 
+export interface UserFavoriteItem {
+  favoriteId: string;
+  analysedLink: AnalysedLinkResponse;
+}
+
+export interface UserFavouriteResponse {
+  userHistory: Array<UserFavoriteItem>;
+  nextPageToken: string | null;
+}
+
 export interface AnalysisResult {
   status: 'success' | 'error';
   data?: AnalysedLinkResponse;

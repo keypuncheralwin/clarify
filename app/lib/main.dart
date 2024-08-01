@@ -7,6 +7,8 @@ import 'package:clarify/screens/main_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences_tools/shared_preferences_tools.dart';
+import 'package:uni_links/uni_links.dart'; // Import uni_links package
+import 'package:clarify/utils/link_utils.dart'; // Import the openLink function
 import 'firebase_options.dart';
 
 void main() async {
@@ -53,6 +55,7 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     platform.setMethodCallHandler(_handleNativeCalls);
+    _initUniLinks(); // Initialize uni_links to handle deep links
     debugPrint('ClarifyApp initialized and observer added');
   }
 
@@ -63,6 +66,33 @@ class _ClarifyAppState extends ConsumerState<ClarifyApp>
       });
       debugPrint(
           'Link analyzed broadcast received, should refresh set to true');
+    }
+  }
+
+  void _initUniLinks() async {
+    try {
+      Uri? initialUri = await getInitialUri();
+      if (initialUri != null) {
+        _handleDeepLink(initialUri);
+      }
+      uriLinkStream.listen((Uri? uri) {
+        if (uri != null) {
+          _handleDeepLink(uri);
+        }
+      });
+    } on PlatformException {
+      // Handle exception
+    }
+  }
+
+  void _handleDeepLink(Uri uri) {
+    if (uri.scheme == 'clarify' && uri.host == 'open') {
+      final String? url = uri.queryParameters['url'];
+      final String? isVideoString = uri.queryParameters['isVideo'];
+      final bool isVideo = isVideoString == 'true';
+      if (url != null) {
+        openLink(context, url, isVideo);
+      }
     }
   }
 

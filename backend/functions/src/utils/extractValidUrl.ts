@@ -2,7 +2,7 @@ import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import logger from '../logger/logger';
 
 /**
- * Extracts and validates a URL from a string.
+ * Extracts and validates a URL from a string, handling Google redirect URLs if present.
  * @param {string} inputString - The input string that may contain a URL.
  * @returns {Promise<string | null>} - A promise that resolves to the valid URL or null if no valid URL is found.
  */
@@ -14,7 +14,16 @@ export default async function extractValidUrl(
   const urls = input.match(urlPattern);
 
   if (urls && urls.length > 0) {
-    const lastUrl = urls[urls.length - 1];
+    let lastUrl = urls[urls.length - 1];
+
+    // Check if it's a Google redirect URL
+    if (lastUrl.includes('https://www.google.com/url')) {
+      const urlParams = new URL(lastUrl).searchParams;
+      const redirectedUrl = urlParams.get('url');
+      if (redirectedUrl) {
+        lastUrl = redirectedUrl;
+      }
+    }
 
     // Sanitize the URL
     try {

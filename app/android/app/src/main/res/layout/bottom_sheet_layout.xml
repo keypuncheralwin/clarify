@@ -125,11 +125,11 @@
 
         <Button
             android:textAllCaps="false"
-            android:id="@+id/doesNothingButton"
+            android:id="@+id/button1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Does Nothing"
+            android:text="Open Clarify"
             android:background="@drawable/button_background_outlined"
             android:textColor="@color/deep_purple"
             android:textSize="16sp"
@@ -137,7 +137,7 @@
 
         <Button
             android:textAllCaps="false"
-            android:id="@+id/visitLinkButton"
+            android:id="@+id/button2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

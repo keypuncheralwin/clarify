@@ -1,6 +1,9 @@
 import { Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { clickbaitArticleCriteria } from '../constants/article';
+import {
+  clickbaitArticleCriteria,
+  generateClickbaitArticlePrompt,
+} from '../constants/article';
 import { safetySettings, generationConfig } from '../constants/gemini';
 import logger from '../logger/logger';
 import { getChatResponse, hashUrl, processResponse } from '../utils/general';
@@ -10,6 +13,7 @@ import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import { AnalysisResult } from '../types/general';
+import fetchArticle from '../utils/fetchArticle';
 
 /**
  * Process the article link and handle the entire flow.
@@ -41,7 +45,27 @@ async function processArticleLink(
     res.json(analysisResult);
     return;
   }
-
+  const article = await fetchArticle(url);
+  if (!article) {
+    const analysisResult: AnalysisResult = {
+      status: 'error',
+      error: {
+        code: 200,
+        message: "Unfortunety, we're not able to clarify that right now.",
+      },
+    };
+    res.status(200).json(analysisResult);
+    return;
+  }
+  const { title, subtitle, content } = article;
+  logger.info(`Fetched article: ${title}`);
+  const prompt: string = generateClickbaitArticlePrompt(
+    title,
+    subtitle,
+    content
+  );
+  logger.info('Generated prompt');
+  logger.info(`Prompt: ${prompt}`);
   const genAI = new GoogleGenerativeAI(apiKey);
 
   const model = genAI.getGenerativeModel({
@@ -53,12 +77,6 @@ async function processArticleLink(
     safetySettings,
     generationConfig,
   });
-
-  const prompt = `
-  please visit and analyze the following webpage ${url}
-`;
-  logger.info('Generated prompt');
-  logger.info(`Prompt: ${prompt}`);
 
   try {
     const aiResponse = await getChatResponse(prompt, chatSession);

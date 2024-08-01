@@ -6,9 +6,9 @@ import {
 } from '@google/generative-ai';
 
 export const generationConfig: GenerationConfig = {
-  temperature: 1,
+  temperature: 0.95,
   topP: 0.95,
-  topK: 64,
+  topK: 60,
   maxOutputTokens: 8192,
   responseMimeType: 'text/plain',
 };
