@@ -50,15 +50,6 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             _buildListTile(
               context,
-              icon: Icons.token,
-              title: 'Manage Tokens',
-              onTap: () {
-                // Implement navigation to manage tokens
-              },
-              isDarkMode: isDarkMode,
-            ),
-            _buildListTile(
-              context,
               icon: Icons.history,
               title: 'Clear History',
               onTap: () {

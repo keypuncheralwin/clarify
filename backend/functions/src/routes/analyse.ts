@@ -20,7 +20,7 @@ router.post(
       return;
     }
 
-    const { url } = req.body;
+    const { url, device_id } = req.body;
     const userUuid = req.user?.uid;
 
     if (!url) {

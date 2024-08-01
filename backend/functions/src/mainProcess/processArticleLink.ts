@@ -81,17 +81,7 @@ async function processArticleLink(
   try {
     const aiResponse = await getChatResponse(prompt, chatSession);
 
-    if (aiResponse?.error) {
-      logger.error(`AI response error: ${aiResponse.error}`);
-      const analysisResult: AnalysisResult = {
-        status: 'error',
-        error: {
-          code: 200,
-          message: aiResponse.error,
-        },
-      };
-      res.status(200).json(analysisResult);
-    } else if (aiResponse) {
+    if (aiResponse) {
       const processedAIResponse = processResponse(aiResponse, 'article', url);
       response = await saveAnalysedLink(hashedUrl, db, processedAIResponse);
       if (userUuid) {

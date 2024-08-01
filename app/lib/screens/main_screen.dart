@@ -2,13 +2,10 @@ import 'package:clarify/types/user_history_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/screens/home_screen.dart';
-import 'package:clarify/screens/favorites_screen.dart';
 import 'package:clarify/screens/account_screen.dart';
-import 'package:clarify/widgets/custom_bottom_navigation_bar.dart';
 import 'package:clarify/api/analyse_link.dart';
 import 'package:clarify/utils/url_validator.dart';
 import 'package:flutter/services.dart';
-import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/providers/user_history_notifier.dart';
 import 'package:clarify/widgets/analysed_link_bottom_sheet.dart';
 import 'package:clarify/types/analysis_result.dart';
@@ -32,14 +29,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   late List<Widget> _children;
 
-  final int _remainingTokens = 10; // Example token count
-
   @override
   void initState() {
     super.initState();
     _children = [
       HomeScreen(key: widget.homeScreenKey),
-      const FavoritesScreen(),
       const AccountScreen(),
     ];
   }
@@ -109,46 +103,71 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
+  void _navigateToAccountScreen() {
+    Navigator.of(context).push(_createRoute());
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Account'),
+        ),
+        body: const AccountScreen(),
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        final tween = Tween(begin: begin, end: end);
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: curve,
+        );
+
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authStateProvider);
-    final authStatus = user != null ? 'Authenticated' : 'Not authenticated';
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clarify'),
         actions: [
-          Row(
-            children: [
-              const SizedBox(width: 5),
-              Text(
-                '$_remainingTokens',
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-              ),
-              const SizedBox(width: 10),
-              const Icon(Icons.token, color: Colors.white),
-            ],
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: _navigateToAccountScreen,
           ),
         ],
       ),
-      body: _children[_currentIndex],
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTabTapped: onTabTapped,
-      ),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: _analyseLink,
-              backgroundColor: Colors.deepPurple,
-              child: Transform.rotate(
-                angle: -0.785398, // -45 degrees in radians
-                child: const Icon(
-                  Icons.link,
-                  color: Colors.white,
+      body: Stack(
+        children: [
+          _children[_currentIndex],
+          if (_currentIndex == 0)
+            Positioned(
+              bottom: MediaQuery.of(context).size.height *
+                  0.05, // 10% of the screen height
+              right: 25.0,
+              child: FloatingActionButton(
+                onPressed: _analyseLink,
+                backgroundColor: Colors.deepPurple,
+                child: Transform.rotate(
+                  angle: -0.785398, // -45 degrees in radians
+                  child: const Icon(
+                    Icons.link,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 }
