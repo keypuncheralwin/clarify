@@ -39,7 +39,7 @@ router.post(
           res.status(400).send('Invalid URL');
           return;
         }
-        await processArticleLink(validUrl, res, apiKey, userUuid);
+        await processArticleLink(validUrl, res, apiKey, deviceId, userUuid);
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -14,6 +14,7 @@ import { saveUrlToUserHistory } from '../dbMethods/saveUrlToUserHistory';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import { AnalysisResult } from '../types/general';
 import fetchArticle from '../utils/fetchArticle';
+import { saveUrlToDeviceHistory } from '../dbMethods/saveUrlToDeviceHistory';
 
 /**
  * Process the article link and handle the entire flow.
@@ -26,6 +27,7 @@ async function processArticleLink(
   url: string,
   res: Response,
   apiKey: string,
+  deviceId: string,
   userUuid?: string
 ): Promise<void> {
   // Initialize firestore
@@ -37,7 +39,15 @@ async function processArticleLink(
   if (response) {
     if (userUuid) {
       response = await saveUrlToUserHistory(hashedUrl, db, userUuid, response);
+    } else {
+      response = await saveUrlToDeviceHistory(
+        hashedUrl,
+        db,
+        deviceId,
+        response
+      );
     }
+
     const analysisResult: AnalysisResult = {
       status: 'success',
       data: response,
@@ -89,6 +99,13 @@ async function processArticleLink(
           hashedUrl,
           db,
           userUuid,
+          response
+        );
+      } else {
+        response = await saveUrlToDeviceHistory(
+          hashedUrl,
+          db,
+          deviceId,
           response
         );
       }

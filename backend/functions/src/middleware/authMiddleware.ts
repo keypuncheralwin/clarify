@@ -32,9 +32,9 @@ export const verifyUserOrDevice = async (
   next: NextFunction
 ): Promise<void> => {
   const token = req.headers.authorization?.split('Bearer ')[1];
-  const { deviceId } = req.body;
+  const deviceId = req.body.deviceId || req.query.deviceId;
 
-  if (!deviceId) {
+  if (!deviceId || deviceId === 'NO_DEVICE_ID') {
     res.status(400).send('Device ID is required');
     return;
   }

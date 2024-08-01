@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:clarify/utils/device_utils.dart'; // Import the utility function
 
 class AuthService {
   static final String baseUrl = dotenv.env['BASE_URL'] ??
       ''; // Use environment variable; // Replace with your backend URL
 
   static Future<void> sendVerificationCode(String email) async {
+    final deviceId = await getDeviceId(); // Get the device ID
     final response = await http.post(
       Uri.parse('$baseUrl/send-verification-code'),
       headers: <String, String>{
@@ -14,6 +16,7 @@ class AuthService {
       },
       body: jsonEncode(<String, String>{
         'email': email,
+        'deviceId': deviceId, // Include the device ID
       }),
     );
 
@@ -24,6 +27,7 @@ class AuthService {
 
   static Future<Map<String, dynamic>> verifyCode(
       String email, String code) async {
+    final deviceId = await getDeviceId(); // Get the device ID
     final response = await http.post(
       Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{
@@ -32,6 +36,7 @@ class AuthService {
       body: jsonEncode(<String, String>{
         'email': email,
         'code': code,
+        'deviceId': deviceId, // Include the device ID
       }),
     );
 
@@ -45,6 +50,7 @@ class AuthService {
 
   static Future<String> createUser(
       String email, String code, String name) async {
+    final deviceId = await getDeviceId(); // Get the device ID
     final response = await http.post(
       Uri.parse('$baseUrl/verify-code'),
       headers: <String, String>{
@@ -54,6 +60,7 @@ class AuthService {
         'email': email,
         'code': code,
         'name': name,
+        'deviceId': deviceId, // Include the device ID
       }),
     );
 

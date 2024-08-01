@@ -19,13 +19,13 @@ export interface AnalysedLinkResponse extends ProcessedAIResponse {
   isAlreadyInHistory?: boolean;
 }
 
-export interface HistoryItem {
+export interface UserHistoryItem {
   historyId: string;
   analysedLink: AnalysedLinkResponse;
 }
 
-export interface HistoryResponse {
-  userHistory: Array<HistoryItem>;
+export interface UserHistoryResponse {
+  userHistory: Array<UserHistoryItem>;
   nextPageToken: string | null;
 }
 
