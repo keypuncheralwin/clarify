@@ -300,6 +300,8 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     final answer = result.answer;
     final summary = result.summary;
     final combinedLength = answer.length + summary.length;
+    String clarityScoreDefinition =
+        'The clarity score is a measure from 0 to 10 indicating how clear and accurate the title is, with higher scores indicating greater clarity and accuracy. Click on the clarity score to see the reason behind the score.';
 
     double containerHeight =
         MediaQuery.of(context).size.height * 0.5; // 50% of the screen height
@@ -340,16 +342,24 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
                     color: Colors.white, fontSize: 12), // Smaller font size
               ),
             ),
-            Transform.scale(
-              scale: 0.8,
-              child: IconButton(
-                icon: Icon(Icons.copy,
-                    color: isDarkMode ? Colors.white : Colors.black),
-                onPressed: () {
-                  _copyToClipboard(title, clarityScore, answer, summary);
-                },
-              ),
-            )
+            IconButton(
+              padding: EdgeInsets.zero, // Remove internal padding
+              constraints: BoxConstraints(), // Remove default constraints
+              icon: Icon(Icons.help_outline,
+                  color: isDarkMode ? Colors.white : Colors.black),
+              onPressed: () {
+                _showTooltip(context, clarityScoreDefinition);
+              },
+            ),
+            IconButton(
+              padding: EdgeInsets.zero, // Remove internal padding
+              constraints: BoxConstraints(), // Remove default constraints
+              icon: Icon(Icons.copy_all_rounded,
+                  color: isDarkMode ? Colors.white : Colors.black),
+              onPressed: () {
+                _copyToClipboard(title, clarityScore, answer, summary);
+              },
+            ),
           ],
         ),
         const SizedBox(height: 10),
