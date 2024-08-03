@@ -51,14 +51,24 @@
             android:visibility="gone"/>
         
         <ImageView
-        android:id="@+id/helpIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_toEndOf="@id/clarityScoreTextView"
-        android:layout_alignBottom="@id/clarityScoreTextView"
-        android:layout_marginStart="8dp"
-        android:visibility="gone"
-        android:src="@drawable/ic_help_outline_night" />
+            android:id="@+id/helpIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toEndOf="@id/clarityScoreTextView"
+            android:layout_alignBottom="@id/clarityScoreTextView"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_help_outline_night" />
+
+        <ImageView
+            android:id="@+id/copyIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toEndOf="@id/helpIcon"
+            android:layout_alignBottom="@id/clarityScoreTextView"
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            android:src="@drawable/ic_copy_all_rounded_night" />
     </RelativeLayout>
 
     <com.facebook.shimmer.ShimmerFrameLayout

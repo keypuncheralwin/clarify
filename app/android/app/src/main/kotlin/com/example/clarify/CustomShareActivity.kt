@@ -1,6 +1,8 @@
 package com.example.clarify
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -16,6 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import com.clarify.app.R
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -34,6 +37,7 @@ class CustomShareActivity : Activity() {
     private lateinit var titleTextView: TextView
     private lateinit var clarityScoreTextView: TextView
     private lateinit var helpIcon: ImageView
+    private lateinit var copyIcon: ImageView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
     private lateinit var button1: Button
@@ -86,6 +90,7 @@ class CustomShareActivity : Activity() {
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
         helpIcon = bottomSheetView.findViewById(R.id.helpIcon)
+        copyIcon = bottomSheetView.findViewById(R.id.copyIcon)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
         button1 = bottomSheetView.findViewById(R.id.button1)
@@ -96,7 +101,8 @@ class CustomShareActivity : Activity() {
         buttonLayout.visibility = View.GONE
         button1.visibility = View.GONE
         button2.visibility = View.GONE
-        helpIcon.visibility = View.GONE // Ensure helpIcon is also initially set to GONE
+        helpIcon.visibility = View.GONE
+        copyIcon.visibility = View.GONE 
         Log.d("CustomShareActivity", "Buttons initialized and set to GONE")
 
         bottomSheetView.setOnClickListener {
@@ -110,6 +116,13 @@ class CustomShareActivity : Activity() {
         helpIcon.setOnClickListener {
             val clarityScoreDefinition = "The clarity score is a measure from 0 to 10 indicating how clear and accurate the title is, with higher scores indicating greater clarity and accuracy. Click on the clarity score to see the reason behind the score."
             showTooltip(clarityScoreDefinition, clarityScoreTextView)
+        }
+
+        copyIcon.setOnClickListener {
+            analysedLinkResponse?.let { result ->
+                val textToCopy = "Title: ${result.title}\nClarity Score: ${result.clarityScore}\nMain Point: ${result.answer}\nSummary: ${result.summary}"
+                copyToClipboard(textToCopy)
+            }
         }
 
         button1.setOnClickListener {
@@ -181,6 +194,7 @@ class CustomShareActivity : Activity() {
         clarityScoreTextView.visibility = View.VISIBLE
         titleTextView.visibility = View.VISIBLE
         helpIcon.visibility = View.VISIBLE
+        copyIcon.visibility = View.VISIBLE
         clickbaitTextView.visibility = if (result.answer.isBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 
@@ -242,6 +256,12 @@ class CustomShareActivity : Activity() {
     private fun hideTooltip() {
         tooltipWindow?.dismiss()
         tooltipWindow = null
+    }
+
+    private fun copyToClipboard(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Clarity Score Details", text)
+        clipboard.setPrimaryClip(clip)
     }
 
     override fun onDestroy() {

@@ -173,7 +173,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
         'Title: $title\nClarity Score: $clarityScore\nMain Point: $answer\nSummary: $summary';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Copied to clipboard!')),
+      const SnackBar(content: Text('Clarified link copied to clipboard!')),
     );
   }
 
@@ -344,7 +344,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             ),
             IconButton(
               padding: EdgeInsets.zero, // Remove internal padding
-              constraints: BoxConstraints(), // Remove default constraints
+              constraints: const BoxConstraints(), // Remove default constraints
               icon: Icon(Icons.help,
                   color: isDarkMode ? Colors.white : Colors.black),
               onPressed: () {
@@ -353,7 +353,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             ),
             IconButton(
               padding: EdgeInsets.zero, // Remove internal padding
-              constraints: BoxConstraints(), // Remove default constraints
+              constraints: const BoxConstraints(), // Remove default constraints
               icon: Icon(Icons.copy_all_rounded,
                   color: isDarkMode ? Colors.white : Colors.black),
               onPressed: () {
