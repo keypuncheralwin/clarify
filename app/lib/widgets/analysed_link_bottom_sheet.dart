@@ -362,7 +362,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 0),
         combinedLength > 900
             ? Stack(
                 children: [
