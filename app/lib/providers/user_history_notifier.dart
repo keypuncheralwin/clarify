@@ -1,4 +1,4 @@
-import 'package:clarify/utils/device_utils.dart';
+import 'package:clarify/api/get_deviceId.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/user_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,7 +32,7 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       final response = await _fetchHistory();
       final newItems = response.userHistory;
       print('HISTORY');
-      print(response);
+      print(response.userHistory);
       state = [...state, ...newItems];
       _nextPageToken = response.nextPageToken; // Set the next page token
       _hasMore =
@@ -61,9 +61,11 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
     isRefreshing = true;
 
     try {
+      _nextPageToken = null; // Reset next page token
       final response = await _fetchHistory();
       final newItems = response.userHistory;
-
+      print('FETCHED ITEMS');
+      print(newItems);
       state = newItems; // Replace existing state with new items
       _nextPageToken = response.nextPageToken; // Reset the next page token
       _hasMore =
@@ -73,7 +75,6 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
       print('Error refreshing history: $e');
     } finally {
       isRefreshing = false;
-      state = [...state]; // Trigger state change to update the UI
     }
   }
 
@@ -98,10 +99,12 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   Future<UserHistoryResponse> _fetchHistory() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      final deviceId = await getDeviceId();
+      print('NO USER');
+      final deviceId = await DeviceIdProvider.getDeviceId() ?? 'NO_DEVICE_ID';
       return UserHistoryService.fetchDeviceHistory(deviceId, 10,
           pageToken: _nextPageToken);
     } else {
+      print('USER IS IN');
       return UserHistoryService.fetchUserHistory(10, pageToken: _nextPageToken);
     }
   }

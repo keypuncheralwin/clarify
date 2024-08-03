@@ -80,7 +80,7 @@ class ApiService(private val context: Context) {
         return config["backend_url"] as String
     }
 
-    private fun getDeviceId(): String? {
+    fun getDeviceId(): String? {
         return try {
             Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
         } catch (e: Exception) {

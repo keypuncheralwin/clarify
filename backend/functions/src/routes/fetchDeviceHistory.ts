@@ -1,14 +1,12 @@
 import { Router, Request, Response } from 'express';
 import admin from 'firebase-admin';
 import logger from '../logger/logger';
-import fetchDeviceHistory from '../dbMethods/fetchUserHistory';
-import { verifyUserOrDevice } from '../middleware/authMiddleware';
+import fetchDeviceHistory from '../dbMethods/fetchDeviceHistory';
 
 const router = Router();
 
 router.get(
   '/device-history',
-  verifyUserOrDevice,
   async (req: Request, res: Response): Promise<void> => {
     const {
       pageSize = 10,

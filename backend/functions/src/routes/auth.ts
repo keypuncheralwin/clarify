@@ -95,6 +95,28 @@ router.post(
           { userId: userRecord.uid, requestCount: 0 },
           { merge: true }
         );
+        // Move DeviceHistory to UserHistory
+        const deviceHistoryRef = deviceRef.collection('DeviceHistory');
+        const deviceHistorySnapshot = await deviceHistoryRef.get();
+
+        const userHistoryRef = db
+          .collection('Users')
+          .doc(userRecord.uid)
+          .collection('UserHistory');
+
+        const batch = db.batch();
+
+        deviceHistorySnapshot.forEach((doc) => {
+          const userHistoryDocRef = userHistoryRef.doc(doc.id);
+          batch.set(userHistoryDocRef, doc.data());
+        });
+
+        await batch.commit();
+
+        // Delete DeviceHistory
+        deviceHistorySnapshot.forEach(async (doc) => {
+          await deviceHistoryRef.doc(doc.id).delete();
+        });
       }
 
       res.status(200).json({ token: firebaseToken });

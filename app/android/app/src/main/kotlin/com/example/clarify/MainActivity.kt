@@ -15,7 +15,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.clarify.app/api"
+    private val CHANNEL = "com.example/device_id"
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private lateinit var auth: FirebaseAuth
 
@@ -31,7 +31,7 @@ class MainActivity : FlutterActivity() {
     private val historyUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
-                MethodChannel(messenger, CHANNEL).invokeMethod("historyUpdated", null)
+                MethodChannel(messenger, "com.clarify.app/api").invokeMethod("historyUpdated", null)
             }
         }
     }
@@ -39,6 +39,20 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "getDeviceId") {
+                val deviceId = ApiService(applicationContext).getDeviceId()
+                if (deviceId != null) {
+                    result.success(deviceId)
+                } else {
+                    result.error("UNAVAILABLE", "Device ID not available.", null)
+                }
+            } else {
+                result.notImplemented()
+            }
+        }
+
+        // Existing method channel for analyzeLink
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.clarify.app/api").setMethodCallHandler { call, result ->
             if (call.method == "analyseLink") {
                 val url = call.argument<String>("url")
                 Log.d("MainActivity", "analyseLink called with url: $url")
