@@ -65,7 +65,15 @@ export const verifyUserOrDevice = async (
         requestCount = deviceData?.requestCount || 0;
 
         if (requestCount >= MAX_REQUESTS) {
-          res.status(429).send('Request limit reached. Please sign in.');
+          const limitReached = {
+            status: 'error',
+            error: {
+              code: 200,
+              message:
+                "We're glad you're enjoying Clarify! Please login to continue.",
+            },
+          };
+          res.status(200).json(limitReached);
           return;
         }
       }

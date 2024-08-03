@@ -91,10 +91,7 @@ router.post(
       // Link the device ID to the user ID
       if (deviceId) {
         const deviceRef = db.collection('DeviceRequests').doc(deviceId);
-        await deviceRef.set(
-          { userId: userRecord.uid, requestCount: 0 },
-          { merge: true }
-        );
+
         // Move DeviceHistory to UserHistory
         const deviceHistoryRef = deviceRef.collection('DeviceHistory');
         const deviceHistorySnapshot = await deviceHistoryRef.get();
