@@ -1,10 +1,9 @@
-import 'package:clarify/screens/webview_screen.dart';
 import 'package:clarify/utils/clarity_score_calculator.dart';
 import 'package:clarify/utils/link_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:clarify/types/analysed_link_response.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AnalysedLinkBottomSheet extends StatefulWidget {
   final bool isLoading;
@@ -79,8 +78,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
 
     final RenderBox renderBox =
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
-    final overlay =
-        Overlay.of(context)!.context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
 
     OverlayState? overlayState = Overlay.of(context);
@@ -145,7 +143,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
       ),
     );
 
-    overlayState!.insert(_tooltipOverlay!);
+    overlayState.insert(_tooltipOverlay!);
   }
 
   void _removeTooltip() {
@@ -414,7 +412,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
         Expanded(
           child: OutlinedButton(
             onPressed: () {
-              // Implement your first button action here
+              Share.share(url);
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(
@@ -425,7 +423,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
             child: Text(
-              'Does Nothing',
+              'Share Link',
               style: TextStyle(
                   fontSize: 16,
                   color: isDarkMode ? Colors.white : Colors.deepPurple),
