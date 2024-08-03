@@ -1,9 +1,9 @@
-import 'package:clarify/api/get_deviceId.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/api/user_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:clarify/types/user_history_response.dart';
 import 'auth_provider.dart';
+import 'package:clarify/api/get_deviceId.dart';
 
 class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
   UserHistoryNotifier(this.ref) : super([]) {
@@ -100,12 +100,27 @@ class UserHistoryNotifier extends StateNotifier<List<UserHistoryItem>> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       print('NO USER');
-      final deviceId = await DeviceIdProvider.getDeviceId() ?? 'NO_DEVICE_ID';
-      return UserHistoryService.fetchDeviceHistory(deviceId, 10,
+      return UserHistoryService.fetchDeviceHistory(10,
           pageToken: _nextPageToken);
     } else {
       print('USER IS IN');
       return UserHistoryService.fetchUserHistory(10, pageToken: _nextPageToken);
+    }
+  }
+
+  Future<void> clearHistory() async {
+    final user = FirebaseAuth.instance.currentUser;
+    try {
+      if (user == null) {
+        print('Clearing device history');
+        await UserHistoryService.clearDeviceHistory();
+      } else {
+        print('Clearing user history');
+        await UserHistoryService.clearUserHistory();
+      }
+      await refreshHistory();
+    } catch (e) {
+      print('Error clearing history: $e');
     }
   }
 }

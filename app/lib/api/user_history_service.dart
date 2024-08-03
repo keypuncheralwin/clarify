@@ -1,3 +1,4 @@
+import 'package:clarify/api/get_deviceId.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,9 +34,9 @@ class UserHistoryService {
     return UserHistoryResponse.fromJson(data);
   }
 
-  static Future<UserHistoryResponse> fetchDeviceHistory(
-      String deviceId, int pageSize,
+  static Future<UserHistoryResponse> fetchDeviceHistory(int pageSize,
       {String? pageToken, String searchKeyword = ''}) async {
+    final deviceId = await DeviceIdProvider.getDeviceId() ?? "NO_DEVICE_ID";
     final Uri uri =
         Uri.parse('$baseUrl/device-history').replace(queryParameters: {
       'deviceId': deviceId,
@@ -58,5 +59,44 @@ class UserHistoryService {
     final Map<String, dynamic> data = jsonDecode(response.body);
 
     return UserHistoryResponse.fromJson(data);
+  }
+
+  static Future<void> clearUserHistory() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+
+    final idToken = await user.getIdToken();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/user-history'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $idToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to clear user history');
+    }
+  }
+
+  static Future<void> clearDeviceHistory() async {
+    final deviceId = await DeviceIdProvider.getDeviceId() ?? "NO_DEVICE_ID";
+    final Uri uri =
+        Uri.parse('$baseUrl/device-history').replace(queryParameters: {
+      'deviceId': deviceId,
+    });
+
+    final response = await http.delete(
+      uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to clear device history');
+    }
   }
 }

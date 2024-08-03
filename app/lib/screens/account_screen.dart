@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/providers/theme_provider.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
+import 'package:clarify/widgets/clear_history_bottom_sheet.dart'; // Import the new bottom sheet
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -53,7 +54,7 @@ class AccountScreen extends ConsumerWidget {
               icon: Icons.history,
               title: 'Clear History',
               onTap: () {
-                // Implement clear history functionality
+                _showClearHistoryBottomSheet(context);
               },
               isDarkMode: isDarkMode,
             ),
@@ -187,5 +188,25 @@ class AccountScreen extends ConsumerWidget {
         return const SignInBottomSheet();
       },
     );
+  }
+
+  void _showClearHistoryBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return const ClearHistoryBottomSheet();
+      },
+    ).then((confirmed) {
+      if (confirmed == true) {
+        // Implement the clear history functionality here
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('History cleared successfully')),
+        );
+      }
+    });
   }
 }
