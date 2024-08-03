@@ -345,7 +345,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             IconButton(
               padding: EdgeInsets.zero, // Remove internal padding
               constraints: BoxConstraints(), // Remove default constraints
-              icon: Icon(Icons.help_outline,
+              icon: Icon(Icons.help,
                   color: isDarkMode ? Colors.white : Colors.black),
               onPressed: () {
                 _showTooltip(context, clarityScoreDefinition);

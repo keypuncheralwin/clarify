@@ -33,6 +33,7 @@ class CustomShareActivity : Activity() {
     private lateinit var shimmerContent: ShimmerFrameLayout
     private lateinit var titleTextView: TextView
     private lateinit var clarityScoreTextView: TextView
+    private lateinit var helpIcon: ImageView
     private lateinit var clickbaitTextView: TextView
     private lateinit var summaryTextView: TextView
     private lateinit var button1: Button
@@ -84,6 +85,7 @@ class CustomShareActivity : Activity() {
         shimmerContent = bottomSheetView.findViewById(R.id.shimmerContent)
         titleTextView = bottomSheetView.findViewById(R.id.titleTextView)
         clarityScoreTextView = bottomSheetView.findViewById(R.id.clarityScoreTextView)
+        helpIcon = bottomSheetView.findViewById(R.id.helpIcon)
         clickbaitTextView = bottomSheetView.findViewById(R.id.clickbaitTextView)
         summaryTextView = bottomSheetView.findViewById(R.id.summaryTextView)
         button1 = bottomSheetView.findViewById(R.id.button1)
@@ -94,6 +96,7 @@ class CustomShareActivity : Activity() {
         buttonLayout.visibility = View.GONE
         button1.visibility = View.GONE
         button2.visibility = View.GONE
+        helpIcon.visibility = View.GONE // Ensure helpIcon is also initially set to GONE
         Log.d("CustomShareActivity", "Buttons initialized and set to GONE")
 
         bottomSheetView.setOnClickListener {
@@ -104,9 +107,13 @@ class CustomShareActivity : Activity() {
             currentExplanation?.let { explanation -> showTooltip(explanation, it) }
         }
 
+        helpIcon.setOnClickListener {
+            val clarityScoreDefinition = "The clarity score is a measure from 0 to 10 indicating how clear and accurate the title is, with higher scores indicating greater clarity and accuracy. Click on the clarity score to see the reason behind the score."
+            showTooltip(clarityScoreDefinition, clarityScoreTextView)
+        }
+
         button1.setOnClickListener {
             analysedLinkResponse?.let { result ->
-                val url = result.url
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open"))
                 startActivity(intent)
             }
@@ -120,7 +127,7 @@ class CustomShareActivity : Activity() {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open?url=$url&isVideo=$isVideo"))
                 startActivity(intent)
             }
-        }        
+        }
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -173,6 +180,7 @@ class CustomShareActivity : Activity() {
 
         clarityScoreTextView.visibility = View.VISIBLE
         titleTextView.visibility = View.VISIBLE
+        helpIcon.visibility = View.VISIBLE
         clickbaitTextView.visibility = if (result.answer.isBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 
