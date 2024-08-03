@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:clarify/types/analysed_link_response.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 
 class AnalysedLinkBottomSheet extends StatefulWidget {
   final bool isLoading;
@@ -36,6 +37,12 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     _isLoading = widget.isLoading;
     _result = widget.result;
     _errorMessage = widget.errorMessage;
+
+    // Check initial scroll extent to update shadow visibility
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScrollExtent();
+    });
+
     _scrollController.addListener(_scrollListener);
   }
 
@@ -44,6 +51,15 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _checkScrollExtent() {
+    if (_scrollController.hasClients) {
+      setState(() {
+        _isAtBottom = _scrollController.position.atEdge &&
+            _scrollController.position.pixels != 0;
+      });
+    }
   }
 
   void _scrollListener() {
@@ -149,6 +165,16 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
   void _removeTooltip() {
     _tooltipOverlay?.remove();
     _tooltipOverlay = null;
+  }
+
+  void _copyToClipboard(
+      String title, String clarityScore, String answer, String summary) {
+    final text =
+        'Title: $title\nClarity Score: $clarityScore\nMain Point: $answer\nSummary: $summary';
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Copied to clipboard!')),
+    );
   }
 
   @override
@@ -289,31 +315,45 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
             color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
-        const SizedBox(height: 10),
-        ElevatedButton(
-          key: _buttonKey,
-          onPressed: () {
-            _showTooltip(context, explanation);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: getClarityScoreColor(clarityScoreValue),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+        const SizedBox(height: 0),
+        Row(
+          children: [
+            ElevatedButton(
+              key: _buttonKey,
+              onPressed: () {
+                _showTooltip(context, explanation);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: getClarityScoreColor(clarityScoreValue),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: const Size(
+                    0, 0), // Removes default minimum size constraints
+                tapTargetSize: MaterialTapTargetSize
+                    .shrinkWrap, // Shrinks the tap target size
+              ),
+              child: Text(
+                'Clarity Score: $clarityScore',
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 12), // Smaller font size
+              ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            minimumSize:
-                const Size(0, 0), // Removes default minimum size constraints
-            tapTargetSize:
-                MaterialTapTargetSize.shrinkWrap, // Shrinks the tap target size
-          ),
-          child: Text(
-            'Clarity Score: $clarityScore',
-            style: const TextStyle(
-                color: Colors.white, fontSize: 12), // Smaller font size
-          ),
+            Transform.scale(
+              scale: 0.8,
+              child: IconButton(
+                icon: Icon(Icons.copy,
+                    color: isDarkMode ? Colors.white : Colors.black),
+                onPressed: () {
+                  _copyToClipboard(title, clarityScore, answer, summary);
+                },
+              ),
+            )
+          ],
         ),
         const SizedBox(height: 10),
-        combinedLength > 1000
+        combinedLength > 900
             ? Stack(
                 children: [
                   SizedBox(
@@ -412,7 +452,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
         Expanded(
           child: OutlinedButton(
             onPressed: () {
-              Share.share(url);
+              Share.share(url, subject: 'Check out this link!');
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(
