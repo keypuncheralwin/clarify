@@ -37,7 +37,7 @@ router.post(
 router.post(
   '/verify-code',
   async (req: Request, res: Response): Promise<void> => {
-    const { email, code, name, device_id } = req.body;
+    const { email, code, name, deviceId } = req.body;
 
     if (!email || !code) {
       res.status(400).send('Email and code are required');
@@ -89,12 +89,34 @@ router.post(
         .createCustomToken(userRecord.uid);
 
       // Link the device ID to the user ID
-      if (device_id) {
-        const deviceRef = db.collection('DeviceRequests').doc(device_id);
+      if (deviceId) {
+        const deviceRef = db.collection('DeviceRequests').doc(deviceId);
         await deviceRef.set(
           { userId: userRecord.uid, requestCount: 0 },
           { merge: true }
         );
+        // Move DeviceHistory to UserHistory
+        const deviceHistoryRef = deviceRef.collection('DeviceHistory');
+        const deviceHistorySnapshot = await deviceHistoryRef.get();
+
+        const userHistoryRef = db
+          .collection('Users')
+          .doc(userRecord.uid)
+          .collection('UserHistory');
+
+        const batch = db.batch();
+
+        deviceHistorySnapshot.forEach((doc) => {
+          const userHistoryDocRef = userHistoryRef.doc(doc.id);
+          batch.set(userHistoryDocRef, doc.data());
+        });
+
+        await batch.commit();
+
+        // Delete DeviceHistory
+        deviceHistorySnapshot.forEach(async (doc) => {
+          await deviceHistoryRef.doc(doc.id).delete();
+        });
       }
 
       res.status(200).json({ token: firebaseToken });

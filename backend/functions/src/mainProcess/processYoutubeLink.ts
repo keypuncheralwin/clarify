@@ -35,6 +35,7 @@ import { saveAnalysedLink } from '../dbMethods/saveAnalysedLink';
 import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { AnalysisResult } from '../types/general';
+import { saveUrlToDeviceHistory } from '../dbMethods/saveUrlToDeviceHistory';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -47,6 +48,7 @@ async function processYouTubeLink(
   url: string,
   res: Response,
   apiKey: string,
+  deviceId: string,
   userUuid?: string
 ): Promise<void> {
   const db = firestore();
@@ -66,6 +68,13 @@ async function processYouTubeLink(
   if (response) {
     if (userUuid) {
       response = await saveUrlToUserHistory(hashedUrl, db, userUuid, response);
+    } else {
+      response = await saveUrlToDeviceHistory(
+        hashedUrl,
+        db,
+        deviceId,
+        response
+      );
     }
     const analysisResult: AnalysisResult = {
       status: 'success',
@@ -131,18 +140,7 @@ async function processYouTubeLink(
 
     const aiResponse = await getChatResponse(messageParts, chatSession);
 
-    if (aiResponse?.error) {
-      logger.error(`AI response error: ${aiResponse.error}`);
-      const analysisResult: AnalysisResult = {
-        status: 'error',
-        error: {
-          code: 400,
-          message: aiResponse.error,
-        },
-      };
-      saveFailedToAnalyseLink(finalUrl, aiResponse.error);
-      res.status(400).json(analysisResult);
-    } else if (aiResponse) {
+    if (aiResponse) {
       const processedAIResponse = processResponse(
         aiResponse,
         'youtube',
@@ -154,6 +152,13 @@ async function processYouTubeLink(
           hashedUrl,
           db,
           userUuid,
+          response
+        );
+      } else {
+        response = await saveUrlToDeviceHistory(
+          hashedUrl,
+          db,
+          deviceId,
           response
         );
       }
