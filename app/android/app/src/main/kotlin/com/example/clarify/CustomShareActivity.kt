@@ -18,7 +18,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import com.clarify.app.R
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -43,6 +42,7 @@ class CustomShareActivity : Activity() {
     private lateinit var button1: Button
     private lateinit var button2: Button
     private lateinit var buttonLayout: LinearLayout
+    private lateinit var clarityScoreGroup: LinearLayout
     private var tooltipWindow: PopupWindow? = null
     private var currentExplanation: String? = null
     private var analysedLinkResponse: AnalysedLinkResponse? = null
@@ -96,13 +96,13 @@ class CustomShareActivity : Activity() {
         button1 = bottomSheetView.findViewById(R.id.button1)
         button2 = bottomSheetView.findViewById(R.id.button2)
         buttonLayout = bottomSheetView.findViewById(R.id.buttonLayout)
+        clarityScoreGroup = bottomSheetView.findViewById(R.id.clarityScoreGroup)
 
         // Set initial visibility to GONE
         buttonLayout.visibility = View.GONE
         button1.visibility = View.GONE
         button2.visibility = View.GONE
-        helpIcon.visibility = View.GONE
-        copyIcon.visibility = View.GONE 
+        clarityScoreGroup.visibility = View.GONE 
         Log.d("CustomShareActivity", "Buttons initialized and set to GONE")
 
         bottomSheetView.setOnClickListener {
@@ -165,6 +165,7 @@ class CustomShareActivity : Activity() {
                             currentExplanation = result.data.explanation
                             if (result.data.isAlreadyInHistory != true) {
                                 sendBroadcast(Intent("com.clarify.app.ACTION_HISTORY_UPDATED"))  // Send broadcast
+                                Log.e("CustomShareActivity", "Broadcast sent")
                             }
                             runOnUiThread { displayResult(result.data) }
                         }
@@ -195,6 +196,7 @@ class CustomShareActivity : Activity() {
         titleTextView.visibility = View.VISIBLE
         helpIcon.visibility = View.VISIBLE
         copyIcon.visibility = View.VISIBLE
+        clarityScoreGroup.visibility = View.VISIBLE
         clickbaitTextView.visibility = if (result.answer.isBlank()) View.GONE else View.VISIBLE
         summaryTextView.visibility = View.VISIBLE
 

@@ -8,10 +8,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="8dp"
-        >
+        android:layout_height="wrap_content">
 
         <View
             android:id="@+id/closeIndicator"
@@ -36,42 +33,45 @@
             android:layout_alignParentStart="true"
             android:textIsSelectable="true"/>
 
-        <TextView
-            android:id="@+id/clarityScoreTextView"
+        <LinearLayout
+            android:id="@+id/clarityScoreGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/titleTextView"
-            android:layout_alignParentStart="true"
             android:layout_marginTop="4dp"
-            android:text="Clarity Score"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:background="@drawable/pill_background"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:visibility="gone"/>
-        
-        <ImageView
-            android:id="@+id/helpIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_toEndOf="@id/clarityScoreTextView"
-            android:layout_alignBottom="@id/clarityScoreTextView"
-            android:layout_marginStart="8dp"
-            android:visibility="gone"
-            android:src="@drawable/ic_help_outline_night" />
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal"
+            android:layout_alignParentStart="true"
+            android:visibility="gone">
 
-        <ImageView
-            android:id="@+id/copyIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_toEndOf="@id/helpIcon"
-            android:layout_alignBottom="@id/clarityScoreTextView"
-            android:layout_marginStart="8dp"
-            android:visibility="gone"
-            android:src="@drawable/ic_copy_all_rounded_night" />
+            <TextView
+                android:id="@+id/clarityScoreTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clarity Score"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:background="@drawable/pill_background"
+                android:layout_marginTop="3dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"/>
+            
+            <ImageView
+                android:id="@+id/helpIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_help_outline_night"/>
+
+            <ImageView
+                android:id="@+id/copyIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_copy_all_rounded_night"/>
+        </LinearLayout>
     </RelativeLayout>
 
     <com.facebook.shimmer.ShimmerFrameLayout

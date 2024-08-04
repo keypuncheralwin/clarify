@@ -31,7 +31,13 @@ router.post(
     try {
       const youTubeVideoLink = containsValidYoutubeUrl(url);
       if (youTubeVideoLink) {
-        await processYouTubeLink(youTubeVideoLink, res, apiKey, userUuid);
+        await processYouTubeLink(
+          youTubeVideoLink,
+          res,
+          apiKey,
+          deviceId,
+          userUuid
+        );
       } else {
         const validUrl = await extractValidUrl(url);
         console.log('validURL:', validUrl);

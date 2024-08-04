@@ -31,7 +31,8 @@
     "firebase-functions": "^5.0.1",
     "node-html-parser": "^6.1.13",
     "nodemailer": "^6.9.14",
-    "resend": "^3.4.0"
+    "resend": "^3.4.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

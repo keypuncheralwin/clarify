@@ -12,7 +12,6 @@ import {
 } from '../utils/general';
 import {
   extractYouTubeID,
-  fetchTranscript,
   YoutubeTranscriptError,
 } from '../utils/youtubeTranscript';
 import {
@@ -36,6 +35,7 @@ import { saveFailedToAnalyseLink } from '../dbMethods/saveFailedToAnalyseLink';
 import { getAnalysedLinkIfExists } from '../dbMethods/getAnalysedLinkIfExists';
 import { AnalysisResult } from '../types/general';
 import { saveUrlToDeviceHistory } from '../dbMethods/saveUrlToDeviceHistory';
+import getFullTranscript from '../utils/fetchYoutubeTranscript';
 
 /**
  * Process the YouTube link to determine if the video is clickbait.
@@ -86,14 +86,25 @@ async function processYouTubeLink(
 
   try {
     // Fetch transcript using custom function
-    const { videoTitle, transcript } = await fetchTranscript(finalUrl);
-    const transcriptText = transcript.map((entry) => entry.text).join(' ');
-
+    const { transcript, title } = await getFullTranscript(youtubeId);
+    if (transcript === null || title === null) {
+      logger.error('Transcript or title is null for:', youtubeId);
+      const analysisResult: AnalysisResult = {
+        status: 'error',
+        error: {
+          code: 200,
+          message:
+            "Unfortunety, we're not able to clarify this video right now",
+        },
+      };
+      res.status(200).json(analysisResult);
+      return;
+    }
     // Fetch and encode thumbnail image
     const thumbnailUrls = getYouTubeThumbnailUrls(finalUrl);
     const thumbnailBase64 = await getBase64ImageFromUrl(thumbnailUrls);
 
-    const prompt = generateClickbaitYouTubePrompt(videoTitle, transcriptText);
+    const prompt = generateClickbaitYouTubePrompt(title, transcript);
 
     // Initialize the Gemini model and start a chat session
     const genAI = new GoogleGenerativeAI(apiKey);
