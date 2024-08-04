@@ -128,19 +128,20 @@ class CustomShareActivity : Activity() {
         button1.setOnClickListener {
             analysedLinkResponse?.let { result ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open"))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 startActivity(intent)
             }
-        }
+        }        
 
         button2.setOnClickListener {
-            // Handle "Visit Link" button click
             analysedLinkResponse?.let { result ->
                 val url = result.url
                 val isVideo = result.isVideo
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open?url=$url&isVideo=$isVideo"))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 startActivity(intent)
             }
-        }
+        }        
     }
 
     private fun handleIntent(intent: Intent?) {
