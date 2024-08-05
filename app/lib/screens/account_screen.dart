@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:clarify/providers/theme_provider.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
-import 'package:clarify/widgets/clear_history_bottom_sheet.dart'; // Import the new bottom sheet
+import 'package:clarify/widgets/clear_history_bottom_sheet.dart';
+import 'package:clarify/widgets/tutorial_bottom_sheet.dart'; // Import the new bottom sheet
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -109,9 +110,9 @@ class AccountScreen extends ConsumerWidget {
             _buildListTile(
               context,
               icon: Icons.help_outline,
-              title: 'How to Use',
+              title: 'How to use Clarify',
               onTap: () {
-                // Implement navigation to how to use
+                _showTutorialBottomSheet(context);
               },
               isDarkMode: isDarkMode,
             ),
@@ -208,5 +209,18 @@ class AccountScreen extends ConsumerWidget {
         );
       }
     });
+  }
+
+  void _showTutorialBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return const TutorialBottomSheet();
+      },
+    );
   }
 }

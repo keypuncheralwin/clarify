@@ -16,14 +16,14 @@ class WebViewScreen extends ConsumerWidget {
         ? ThemeData.dark().copyWith(
             primaryColor: Colors.deepPurple,
             appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF1F1F1F), // Match the dark mode color
+              backgroundColor: Color(0xFF1F1F1F),
               foregroundColor: Colors.white,
             ),
           )
         : ThemeData.light().copyWith(
             primaryColor: Colors.deepPurple,
             appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.white, // Match the light mode color
+              backgroundColor: Colors.white,
               foregroundColor: Color(0xFF1F1F1F),
             ),
           );
