@@ -8,6 +8,7 @@ import analyse from './routes/analyse';
 import serviceAccount from './key.json';
 import fetchUserHistory from './routes/fetchUserHistory';
 import fetchDeviceHistory from './routes/fetchDeviceHistory';
+import feedback from './routes/feedback';
 
 dotenv.config();
 
@@ -24,5 +25,6 @@ app.use(auth);
 app.use(analyse);
 app.use(fetchUserHistory);
 app.use(fetchDeviceHistory);
+app.use(feedback);
 
 exports.api = functions.https.onRequest(app);

@@ -1,3 +1,4 @@
+// lib/screens/account_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +6,8 @@ import 'package:clarify/providers/theme_provider.dart';
 import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
 import 'package:clarify/widgets/clear_history_bottom_sheet.dart';
-import 'package:clarify/widgets/tutorial_bottom_sheet.dart'; // Import the new bottom sheet
+import 'package:clarify/widgets/tutorial_bottom_sheet.dart';
+import 'package:clarify/widgets/feedback_bottom_sheet.dart'; // Import the new bottom sheet
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -94,6 +96,15 @@ class AccountScreen extends ConsumerWidget {
               title: 'Share with Friends',
               onTap: () {
                 // Implement share with friends functionality
+              },
+              isDarkMode: isDarkMode,
+            ),
+            _buildListTile(
+              context,
+              icon: Icons.feedback,
+              title: 'Leave Feedback, Please...',
+              onTap: () {
+                _showFeedbackBottomSheet(context); // Add this function call
               },
               isDarkMode: isDarkMode,
             ),
@@ -220,6 +231,19 @@ class AccountScreen extends ConsumerWidget {
       ),
       builder: (context) {
         return const TutorialBottomSheet();
+      },
+    );
+  }
+
+  void _showFeedbackBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return const FeedbackBottomSheet();
       },
     );
   }

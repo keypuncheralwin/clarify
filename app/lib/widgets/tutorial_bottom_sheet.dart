@@ -65,6 +65,7 @@ class _TutorialBottomSheetState extends State<TutorialBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return FractionallySizedBox(
       heightFactor: 0.85,
       child: Padding(
@@ -81,7 +82,7 @@ class _TutorialBottomSheetState extends State<TutorialBottomSheet> {
                 width: 40,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -161,8 +162,7 @@ class _TutorialBottomSheetState extends State<TutorialBottomSheet> {
                     Text(
                       item['text']!,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
