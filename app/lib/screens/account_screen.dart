@@ -1,4 +1,5 @@
 // lib/screens/account_screen.dart
+import 'package:clarify/widgets/confirm_logout_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,8 @@ import 'package:clarify/providers/auth_provider.dart';
 import 'package:clarify/widgets/sign_in_bottom_sheet.dart';
 import 'package:clarify/widgets/clear_history_bottom_sheet.dart';
 import 'package:clarify/widgets/tutorial_bottom_sheet.dart';
-import 'package:clarify/widgets/feedback_bottom_sheet.dart'; // Import the new bottom sheet
+import 'package:clarify/widgets/feedback_bottom_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -23,25 +25,23 @@ class AccountScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            Center(
-              child: user == null
-                  ? ElevatedButton(
-                      onPressed: () {
-                        _showEmailBottomSheet(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 12),
-                      ),
-                      child: const Text(
-                        'Sign in or create an account',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            if (user == null)
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showEmailBottomSheet(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text(
+                    'Sign in or create an account',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
             const SizedBox(height: 40),
             Text(
               'General Settings',
@@ -82,7 +82,7 @@ class AccountScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 40),
             Text(
-              'Support Indie Devs',
+              'Support the Clarify team',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -95,16 +95,16 @@ class AccountScreen extends ConsumerWidget {
               icon: Icons.share,
               title: 'Share with Friends',
               onTap: () {
-                // Implement share with friends functionality
+                _shareApp(context); // Call the share function
               },
               isDarkMode: isDarkMode,
             ),
             _buildListTile(
               context,
               icon: Icons.feedback,
-              title: 'Leave Feedback, Please...',
+              title: 'Leave Feedback (Please...)',
               onTap: () {
-                _showFeedbackBottomSheet(context); // Add this function call
+                _showFeedbackBottomSheet(context);
               },
               isDarkMode: isDarkMode,
             ),
@@ -129,34 +129,30 @@ class AccountScreen extends ConsumerWidget {
             ),
             _buildListTile(
               context,
-              icon: Icons.contact_mail,
-              title: 'Contact Us',
-              onTap: () {
-                // Implement contact us functionality
-              },
-              isDarkMode: isDarkMode,
-            ),
-            _buildListTile(
-              context,
               icon: Icons.info_outline,
               title: 'App Version',
               subtitle: dotenv.env['APP_VER'],
               isDarkMode: isDarkMode,
             ),
-            if (user != null)
-              _buildListTile(
-                context,
-                icon: Icons.logout,
-                title: 'Logout',
-                onTap: () {
-                  ref.read(authStateProvider.notifier).signOut();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Logged out successfully')),
-                  );
-                },
-                isDarkMode: isDarkMode,
-                textColor: Colors.red,
+            if (user != null) ...[
+              const SizedBox(height: 40),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showConfirmLogoutBottomSheet(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 80, vertical: 10),
+                  ),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
               ),
+            ],
           ],
         ),
       ),
@@ -214,7 +210,6 @@ class AccountScreen extends ConsumerWidget {
       },
     ).then((confirmed) {
       if (confirmed == true) {
-        // Implement the clear history functionality here
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('History cleared successfully')),
         );
@@ -244,6 +239,25 @@ class AccountScreen extends ConsumerWidget {
       ),
       builder: (context) {
         return const FeedbackBottomSheet();
+      },
+    );
+  }
+
+  void _shareApp(BuildContext context) {
+    const String message =
+        'Hey, check out the Clarify app at www.clarifyapp.io';
+    Share.share(message);
+  }
+
+  void _showConfirmLogoutBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return const ConfirmLogoutBottomSheet();
       },
     );
   }

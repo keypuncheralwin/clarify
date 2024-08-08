@@ -1,33 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:clarify/providers/user_history_notifier.dart';
+import 'package:clarify/providers/auth_provider.dart';
+import 'package:clarify/providers/user_history_notifier.dart'; // Import the user history provider
 
-class ClearHistoryBottomSheet extends ConsumerStatefulWidget {
-  const ClearHistoryBottomSheet({super.key});
+class ConfirmLogoutBottomSheet extends ConsumerStatefulWidget {
+  const ConfirmLogoutBottomSheet({super.key});
 
   @override
-  _ClearHistoryBottomSheetState createState() =>
-      _ClearHistoryBottomSheetState();
+  _ConfirmLogoutBottomSheetState createState() =>
+      _ConfirmLogoutBottomSheetState();
 }
 
-class _ClearHistoryBottomSheetState
-    extends ConsumerState<ClearHistoryBottomSheet> {
+class _ConfirmLogoutBottomSheetState
+    extends ConsumerState<ConfirmLogoutBottomSheet> {
   bool _isLoading = false;
 
-  Future<void> _clearHistory() async {
+  Future<void> _logout() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      await ref.read(userHistoryProvider.notifier).clearHistory();
+      await ref.read(authStateProvider.notifier).signOut();
+      await ref
+          .read(userHistoryProvider.notifier)
+          .refreshHistory(); // Refresh history after logout
       Navigator.of(context).pop(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged out successfully')),
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to clear history: $e')),
+        SnackBar(content: Text('Failed to log out: $e')),
       );
     }
   }
@@ -59,7 +66,7 @@ class _ClearHistoryBottomSheetState
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              'Are you sure you want to clear your history?',
+              'Are you sure you want to log out?',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -96,9 +103,9 @@ class _ClearHistoryBottomSheetState
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _clearHistory,
+                    onPressed: _isLoading ? null : _logout,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: Colors.red,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -115,7 +122,7 @@ class _ClearHistoryBottomSheetState
                             ),
                           )
                         : const Text(
-                            'Confirm',
+                            'Logout',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                   ),

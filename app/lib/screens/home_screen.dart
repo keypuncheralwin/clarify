@@ -52,33 +52,54 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
               key: _refreshIndicatorKey,
               onRefresh: _refresh,
               child: userHistory.isEmpty
-                  ? _buildWelcomeMessage(user)
+                  ? _buildWelcomeMessageCard(user)
                   : _buildUserHistory(userHistory, isLoadingMore),
             ),
     );
   }
 
-  Widget _buildWelcomeMessage(User? user) {
-    return Center(
+  Widget _buildWelcomeMessageCard(User? user) {
+    final theme = Theme.of(context);
+    final borderColor =
+        theme.brightness == Brightness.dark ? Colors.white : Colors.deepPurple;
+    final textColor =
+        theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              user == null
-                  ? 'Welcome to Clarify!'
-                  : 'Welcome to Clarify, ${user.displayName ?? 'User'}!',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 24, color: Colors.grey),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: borderColor),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: theme.cardColor,
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  user == null
+                      ? 'Welcome to Clarify!'
+                      : 'Welcome to Clarify, ${user.displayName ?? 'User'}!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Get started by sharing a link to the Clarify app or paste a link here by tapping the link button below",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "Get started by sharing a link to the Clarify app or paste a link here by tapping the link button below",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
+          ),
         ),
       ),
     );
