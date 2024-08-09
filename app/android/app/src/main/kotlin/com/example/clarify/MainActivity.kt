@@ -23,9 +23,13 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()  // Initialize Firebase Auth
 
-        // Register broadcast receiver
-        val filter = IntentFilter("com.clarify.app.ACTION_HISTORY_UPDATED")
+    // Register broadcast receiver
+    val filter = IntentFilter("com.clarify.app.ACTION_HISTORY_UPDATED")
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         registerReceiver(historyUpdateReceiver, filter, Context.RECEIVER_EXPORTED)
+    } else {
+        registerReceiver(historyUpdateReceiver, filter)
+    }
     }
 
     private val historyUpdateReceiver = object : BroadcastReceiver() {
