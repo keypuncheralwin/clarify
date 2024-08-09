@@ -126,7 +126,7 @@ class CustomShareActivity : Activity() {
         }
 
         button1.setOnClickListener {
-            analysedLinkResponse?.let { result ->
+            analysedLinkResponse?.let { _ ->
                 bottomSheetDialog.dismiss()
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("clarify://open"))
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -161,8 +161,7 @@ class CustomShareActivity : Activity() {
             coroutineScope.launch {
                 try {
                     val idToken = getIdToken()
-                    val result = apiService.analyseLink(sharedText, idToken)
-                    when (result) {
+                    when (val result = apiService.analyseLink(sharedText, idToken)) {
                         is AnalysisResult.Success -> {
                             analysedLinkResponse = result.data
                             currentExplanation = result.data.explanation
