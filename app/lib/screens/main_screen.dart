@@ -141,7 +141,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         title: const Text('Clarify'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.tune),
             onPressed: _navigateToAccountScreen,
           ),
         ],

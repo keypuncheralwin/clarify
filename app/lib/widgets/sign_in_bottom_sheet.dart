@@ -14,7 +14,8 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
   final FocusNode _emailFocusNode = FocusNode();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final List<TextEditingController> _codeControllers = List.generate(4, (_) => TextEditingController());
+  final List<TextEditingController> _codeControllers =
+      List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _codeFocusNodes = List.generate(4, (_) => FocusNode());
   final FocusNode _nameFocusNode = FocusNode();
   bool _isCodeSent = false;
@@ -67,9 +68,7 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
       setState(() {
         _isCodeSent = true;
         _email = email;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _codeFocusNodes[0].requestFocus();
-        });
+        // Removed auto-focus on the first code input field
       });
     } catch (e) {
       setState(() {
@@ -113,7 +112,8 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
         setState(() {
           _isVerifyingCode = false;
         });
-        Navigator.of(context).pop(); // Close the bottom sheet after successful login
+        Navigator.of(context)
+            .pop(); // Close the bottom sheet after successful login
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Successfully signed in')),
         );
@@ -148,7 +148,8 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
       setState(() {
         _isVerifyingCode = false;
       });
-      Navigator.of(context).pop(); // Close the bottom sheet after successful login
+      Navigator.of(context)
+          .pop(); // Close the bottom sheet after successful login
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Successfully signed in')),
       );
@@ -288,11 +289,15 @@ class _SignInBottomSheetState extends ConsumerState<SignInBottomSheet> {
                   border: OutlineInputBorder(),
                   counterText: '',
                 ),
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value.isNotEmpty && index < 3) {
+                    // Debounce the focus change by adding a small delay
+                    await Future.delayed(const Duration(milliseconds: 100));
                     _codeFocusNodes[index + 1].requestFocus();
                   }
                   if (value.isEmpty && index > 0) {
+                    // Debounce the focus change by adding a small delay
+                    await Future.delayed(const Duration(milliseconds: 100));
                     _codeFocusNodes[index - 1].requestFocus();
                   }
                 },
