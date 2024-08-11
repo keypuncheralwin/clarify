@@ -9,6 +9,7 @@ import serviceAccount from './key.json';
 import fetchUserHistory from './routes/fetchUserHistory';
 import fetchDeviceHistory from './routes/fetchDeviceHistory';
 import feedback from './routes/feedback';
+import subscribe from './routes/subscibe';
 
 dotenv.config();
 
@@ -26,5 +27,6 @@ app.use(analyse);
 app.use(fetchUserHistory);
 app.use(fetchDeviceHistory);
 app.use(feedback);
+app.use(subscribe);
 
 exports.api = functions.https.onRequest(app);
