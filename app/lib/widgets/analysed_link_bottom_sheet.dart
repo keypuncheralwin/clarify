@@ -301,7 +301,7 @@ class AnalysedLinkBottomSheetState extends State<AnalysedLinkBottomSheet> {
     final summary = result.summary;
     final combinedLength = answer.length + summary.length;
     String clarityScoreDefinition =
-        'The clarity score is a measure from 0 to 10 indicating how clear and accurate the title is, with higher scores indicating greater clarity and accuracy. Click on the clarity score to see the reason behind the score.';
+        'The clarity score is a measure from 0 to 10 indicating how clear and accurate the title is, with higher scores indicating greater clarity and accuracy. Tap on the clarity score to see the reason behind the score.';
 
     double containerHeight =
         MediaQuery.of(context).size.height * 0.5; // 50% of the screen height

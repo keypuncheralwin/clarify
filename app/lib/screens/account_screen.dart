@@ -131,7 +131,7 @@ class AccountScreen extends ConsumerWidget {
               context,
               icon: Icons.info_outline,
               title: 'App Version',
-              subtitle: dotenv.env['APP_VER'],
+              subtitle: dotenv.env['APP_VER'] ?? 'Demo',
               isDarkMode: isDarkMode,
             ),
             if (user != null) ...[

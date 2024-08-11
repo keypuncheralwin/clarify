@@ -138,3 +138,8 @@ app/lib/firebase_options.dart
 
 #backend firebase
 backend/functions/src/key.json
+backend/functions/lib/key.json
+backend/functions/lib
+lib/**/*.js
+lib/**/*.js.map
+lib/**/*.json
