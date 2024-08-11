@@ -77,7 +77,8 @@ class ApiService(private val context: Context) {
         val inputStream = assetManager.open("config.yaml")
         val yaml = Yaml()
         val config = yaml.load<Map<String, Any>>(inputStream)
-        return config["backend_url"] as String
+        val backendUrl = config["backend_url"] as String
+        return "$backendUrl/analyse"
     }
 
     fun getDeviceId(): String? {
